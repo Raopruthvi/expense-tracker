@@ -1,0 +1,53 @@
+package com.expensetracker2.expense_tracker2.controller;
+
+import com.expensetracker2.expense_tracker2.model.Person;
+import com.expensetracker2.expense_tracker2.service.*;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+//This annotation does two things in one:
+//Tells Spring: "this class handles incoming HTTP requests"
+//Tells Spring: "whatever these methods return, convert it to JSON automatically and send it as the response body"
+@RequestMapping("/api/people")
+public class PersonController {
+	private final ExpenseService expenseService;
+	 
+	public PersonController(ExpenseService expenseService) {
+		this.expenseService=expenseService;
+	}
+	
+	@PostMapping   //   POST/api/people
+	public ResponseEntity<Person> createPerson(@RequestBody Person person){   //ResponseEntity gives you control over the entire HTTP response — not just the data but also the status code.
+		Person saved=expenseService.savePerson(person);
+		return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+	}
+	
+	@GetMapping
+	public ResponseEntity<List<Person>> getAllPeople(){
+		return ResponseEntity.ok(expenseService.getAllPeople());
+	}
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<Person> getPersonById(@PathVariable Long id){
+		return ResponseEntity.ok(expenseService.getPersonById(id));
+	}
+	
+	@GetMapping("/{id}/balance")
+	public ResponseEntity<String> getBalance(@PathVariable Long id){
+		var owedTo=expenseService.getTotalOwedTo(id);
+		var owedBy=expenseService.getTotalOwedBy(id);
+		var net=expenseService.getNetBalance(id);
+		
+		String summary=String.format(
+				"Others owe this person: ₹%s | This person owes others: ₹%s | Net balance: ₹%s",owedTo, owedBy, net
+				);
+		return ResponseEntity.ok(summary);
+	}
+	
+
+}
