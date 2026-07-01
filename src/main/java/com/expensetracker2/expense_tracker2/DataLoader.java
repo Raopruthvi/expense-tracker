@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.expensetracker2.expense_tracker2.model.*;
 import com.expensetracker2.expense_tracker2.repository.*;
+import com.expensetracker2.expense_tracker2.model.Category;
 
 
 @Component
@@ -29,9 +30,9 @@ public class DataLoader implements CommandLineRunner{
         personRepository.save(alice);
         personRepository.save(bob);
 
-        Expense e1 = new Expense("Dinner", new BigDecimal("450.00"), LocalDate.now().plusDays(7), alice, bob);
+        Expense e1 = new Expense("Dinner", new BigDecimal("450.00"), LocalDate.now().plusDays(7), alice, bob,Category.FOOD);
 
-        Expense e2 = new Expense("Cab fare", new BigDecimal("120.00"), LocalDate.now().plusDays(3), bob, alice);
+        Expense e2 = new Expense("Cab fare", new BigDecimal("120.00"), LocalDate.now().plusDays(3), bob, alice,Category.MISCELLANEOUS);
 
         expenseRepository.save(e1);
         expenseRepository.save(e2);

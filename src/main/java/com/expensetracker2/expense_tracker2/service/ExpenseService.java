@@ -1,5 +1,6 @@
 package com.expensetracker2.expense_tracker2.service;
 
+import com.expensetracker2.expense_tracker2.exception.ResourceNotFoundException;
 import com.expensetracker2.expense_tracker2.model.*;
 import com.expensetracker2.expense_tracker2.repository.*;
 
@@ -31,7 +32,7 @@ public class ExpenseService {
 	
 	public Person getPersonById(Long id) {
 		return personRepository.findById(id) 
-				.orElseThrow(()->new RuntimeException("Person not found with Id: "+id));
+				.orElseThrow(()->new ResourceNotFoundException("Person not found with Id: "+id));
 	}
 	
 	
@@ -47,7 +48,7 @@ public class ExpenseService {
 	
 	public Expense getExpenseById(Long id) {
 		return expenseRepository.findById(id)
-				.orElseThrow(()-> new RuntimeException("Expense not found with id: "+id));
+				.orElseThrow(()-> new ResourceNotFoundException("Expense not found with id: "+id));
 	}
 	
 	public void deleteExpense(Long id) {

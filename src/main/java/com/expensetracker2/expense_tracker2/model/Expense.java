@@ -26,17 +26,21 @@ public class Expense {
 	@JoinColumn(name="owed_by_id")
 	private Person owedBy;
 	
+	@Enumerated(EnumType.STRING)
+	private Category category;
+	
 	public Expense() {
 		
 	}
 	
-	public Expense(String description, BigDecimal amount, LocalDate deadline, Person paidBy, Person owedBy) {
+	public Expense(String description, BigDecimal amount, LocalDate deadline, Person paidBy, Person owedBy, Category category) {
 		this.description=description;
 		this.amount=amount;
 		this.deadline=deadline;
 		this.settled=false;
 		this.paidBy=paidBy;
 		this.owedBy=owedBy;
+		this.category=category;
 	}
 
 	public long getId() {
@@ -90,6 +94,16 @@ public class Expense {
 	public void setOwedBy(Person owedBy) {
 		this.owedBy = owedBy;
 	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
+	}
+	
+	
 	
 	
 	
