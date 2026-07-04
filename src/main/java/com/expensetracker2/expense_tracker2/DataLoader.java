@@ -23,6 +23,11 @@ public class DataLoader implements CommandLineRunner{
 	
 	@Override
 	public void run(String... args) throws Exception {
+		if (personRepository.count()>0) {
+			System.out.println("==DATA ALREADY EXISTS, SKIPPING LOAD==");
+			return;
+		
+		}
 
         Person alice = new Person("Alice", "alice@email.com");
         Person bob = new Person("Bob", "bob@email.com");
