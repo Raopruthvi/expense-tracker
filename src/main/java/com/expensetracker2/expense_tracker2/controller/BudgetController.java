@@ -1,6 +1,7 @@
 
 package com.expensetracker2.expense_tracker2.controller;
 import java.math.BigDecimal;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,8 @@ import com.expensetracker2.expense_tracker2.service.BudgetService;
 import com.expensetracker2.expense_tracker2.service.BudgetService.EndOfMonthResult;
 import com.expensetracker2.expense_tracker2.service.BudgetService.ExpenseResult;
 import com.expensetracker2.expense_tracker2.service.BudgetService.FinancialSummary;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/budget")
@@ -74,7 +77,7 @@ public ResponseEntity<MonthlyBudget> getCurrentBudget(){
 
 //--------Record expense with budget deduction-------
 @PostMapping("/expense")
-public ResponseEntity<Map<String, Object>> recordExpense(@RequestBody Expense expense){
+public ResponseEntity<Map<String, Object>> recordExpense(@Valid @RequestBody Expense expense){
 	ExpenseResult result=budgetService.recordExpense(expense);
 	
 	Map<String, Object> response=new HashMap<>();

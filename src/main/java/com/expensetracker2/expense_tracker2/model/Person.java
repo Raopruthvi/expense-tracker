@@ -1,5 +1,8 @@
 package com.expensetracker2.expense_tracker2.model;
 import jakarta.persistence.*; //how java should talk to relational databases.
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
 
   @Entity         //This class represents a table                              // You write @Entity (Jakarta annotation)
   public class Person {                                                        //        ↓
@@ -9,7 +12,12 @@ import jakarta.persistence.*; //how java should talk to relational databases.
 	@GeneratedValue(strategy=GenerationType.IDENTITY) //let the database auto-genetate it                      
 	private Long id;
 	
+	
+	@NotBlank(message="Name cannot be blank")
 	private String name;
+	
+	@NotBlank(message="Email cannot be blank")
+	@Email(message="Email must be valid")
 	private String email;
 	
 	public Person() {

@@ -1,6 +1,7 @@
 package com.expensetracker2.expense_tracker2.controller;
 
 import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,6 +9,8 @@ import com.expensetracker2.expense_tracker2.service.ExpenseService;
 import com.expensetracker2.expense_tracker2.model.Expense;
 
 import java.util.List;
+
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -32,7 +35,7 @@ public class ExpenseController {
 	}
 	
 	@PostMapping
-	public ResponseEntity<Expense> createExpense(@RequestBody Expense expense){
+	public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense){
 		Expense saved=expenseService.saveExpense(expense);
 		return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 		

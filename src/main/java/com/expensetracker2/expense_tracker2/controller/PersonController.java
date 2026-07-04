@@ -1,6 +1,7 @@
 package com.expensetracker2.expense_tracker2.controller;
 
 import com.expensetracker2.expense_tracker2.model.Person;
+
 import com.expensetracker2.expense_tracker2.service.*;
 
 import java.util.List;
@@ -8,6 +9,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
 
 @RestController
 //This annotation does two things in one:
@@ -22,7 +25,7 @@ public class PersonController {
 	}
 	
 	@PostMapping   //   POST/api/people
-	public ResponseEntity<Person> createPerson(@RequestBody Person person){   //ResponseEntity gives you control over the entire HTTP response — not just the data but also the status code.
+	public ResponseEntity<Person> createPerson(@Valid @RequestBody Person person){   //ResponseEntity gives you control over the entire HTTP response — not just the data but also the status code.
 		Person saved=expenseService.savePerson(person);
 		return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 	}

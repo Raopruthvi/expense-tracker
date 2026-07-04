@@ -2,9 +2,13 @@ package com.expensetracker2.expense_tracker2.model;
 
 import java.math.BigDecimal;
 
+
 import java.time.LocalDate;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Expense {
@@ -13,8 +17,14 @@ public class Expense {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
 	
+	@NotBlank(message="Description cannot be null")
 	private String description;
+	
+	@NotBlank(message="Amount cannot be null")
+	@DecimalMin(value="0.01", message="amount must be greater than zero")
 	private BigDecimal amount;
+	
+	@NotNull(message="Deadline cannot be null")
 	private LocalDate deadline;
 	private boolean settled;
 	
@@ -27,6 +37,7 @@ public class Expense {
 	private Person owedBy;
 	
 	@Enumerated(EnumType.STRING)
+	@NotNull(message="Category cannot be null")
 	private Category category;
 	
 	public Expense() {
