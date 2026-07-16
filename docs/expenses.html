@@ -44,14 +44,12 @@
                 <input id="deadline" type="date"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
 
-                <div id="peopleSection" class="space-y-3">
-                    <select id="paidBy" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                        <option value="">Paid By (optional)</option>
-                    </select>
-                    <select id="owedBy" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                        <option value="">Owed By (optional)</option>
-                    </select>
-                </div>
+					<div id="peopleSection" class="space-y-3">
+					    <input id="paidBy" type="text" placeholder="Paid By - Name (optional)"
+					        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+					    <input id="owedBy" type="text" placeholder="Owed By - Name (optional)"
+					        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+					</div>
 
                 <div id="warningBox" class="hidden bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-lg p-3 text-sm"></div>
 
@@ -99,8 +97,17 @@
             const amount = document.getElementById('amount').value;
             const category = document.getElementById('category').value;
             const deadline = document.getElementById('deadline').value;
-            const paidById = document.getElementById('paidBy').value;
-            const owedById = document.getElementById('owedBy').value;
+			const paidByName = document.getElementById('paidBy').value;
+			const owedByName = document.getElementById('owedBy').value;
+
+			if (paidByName) {
+			    const person = allPeople.find(p => p.name.toLowerCase() === paidByName.toLowerCase());
+			    if (person) expense.paidBy = { id: person.id };
+			}
+			if (owedByName) {
+			    const person = allPeople.find(p => p.name.toLowerCase() === owedByName.toLowerCase());
+			    if (person) expense.owedBy = { id: person.id };
+			}
 
             if (!description || !amount || !category || !deadline) {
                 alert('Please fill in description, amount, category and deadline');
