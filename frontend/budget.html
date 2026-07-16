@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="bg-blue-600 text-white p-4">
+        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+    </div>
+
+    <div class="bg-white shadow-sm flex overflow-x-auto">
+        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
+        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
+        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
+        <a href="budget.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Budget</a>
+        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
+    </div>
+
+    <div class="p-4 space-y-4">
+
+        <!-- Current Budget Status -->
+        <div id="budgetStatus" class="bg-white rounded-xl shadow p-4">
+            <p class="text-gray-500 text-sm">Loading budget...</p>
+        </div>
+
+        <!-- Setup Profile -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-bold text-gray-700 mb-3">Setup Financial Profile</h2>
+            <div class="space-y-3">
+                <input id="accountBalance" type="number" placeholder="Account Balance (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <input id="cashBalance" type="number" placeholder="Cash Balance (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <input id="salaryAmount" type="number" placeholder="Monthly Salary (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <button onclick="setupProfile()"
+                    class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
+                    Setup Profile
+                </button>
+            </div>
+        </div>
+
+        <!-- Create Monthly Budget -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-bold text-gray-700 mb-3">Create Monthly Budget</h2>
+            <div class="space-y-3">
+                <input id="totalAllowance" type="number" placeholder="Total Monthly Allowance (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <input id="vehicleAllowance" type="number" placeholder="Vehicle Allowance (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <button onclick="createBudget()"
+                    class="w-full bg-green-600 text-white rounded-lg p-3 font-medium text-sm">
+                    Create Budget
+                </button>
+            </div>
+        </div>
+
+        <!-- Update Salary -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-bold text-gray-700 mb-3">Update Salary</h2>
+            <div class="space-y-3">
+                <input id="newSalary" type="number" placeholder="New Salary Amount (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <button onclick="updateSalary()"
+                    class="w-full bg-purple-600 text-white rounded-lg p-3 font-medium text-sm">
+                    Update Salary
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API = 'https://expense-tracker-production-8665.up.railway.app';
+
+        async function loadBudgetStatus() {
+            try {
+                const res = await fetch(`${API}/api/budget/summary`);
+                if (!res.ok) throw new Error();
+                const d = await res.json();
+
+                document.getElementById('budgetStatus').innerHTML = `
+                    <h2 class="font-bold text-gray-700 mb-3">Current Status</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-blue-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500">Account Balance</p>
+                            <p class="font-bold text-blue-600">₹${d.accountBalance}</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500">Savings</p>
+                            <p class="font-bold text-green-600">₹${d.savingsAmount}</p>
+                        </div>
+                        <div class="bg-purple-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500">Remaining Salary</p>
+                            <p class="font-bold text-purple-600">₹${d.remainingSalary}</p>
+                        </div>
+                        <div class="bg-orange-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500">Vehicle Allowance</p>
+                            <p class="font-bold text-orange-600">₹${d.remainingVehicleAllowance}</p>
+                        </div>
+                    </div>
+                `;
+            } catch {
+                document.getElementById('budgetStatus').innerHTML =
+                    '<p class="text-gray-400 text-sm">No profile set up yet. Use the form below.</p>';
+            }
+        }
+
+        async function setupProfile() {
+            const body = {
+                accountBalance: parseFloat(document.getElementById('accountBalance').value),
+                cashBalance: parseFloat(document.getElementById('cashBalance').value),
+                salaryAmount: parseFloat(document.getElementById('salaryAmount').value)
+            };
+            if (!body.accountBalance || !body.cashBalance || !body.salaryAmount) {
+                alert('Fill in all fields'); return;
+            }
+            const res = await fetch(`${API}/api/budget/profile/setup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) { alert('Profile set up successfully!'); loadBudgetStatus(); }
+            else { const e = await res.json(); alert(e.message || 'Error setting up profile'); }
+        }
+
+        async function createBudget() {
+            const body = {
+                totalAllowance: parseFloat(document.getElementById('totalAllowance').value),
+                vehicleAllowance: parseFloat(document.getElementById('vehicleAllowance').value)
+            };
+            if (!body.totalAllowance || !body.vehicleAllowance) {
+                alert('Fill in all fields'); return;
+            }
+            const res = await fetch(`${API}/api/budget/monthly`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) { alert('Budget created!'); loadBudgetStatus(); }
+            else { const e = await res.json(); alert(e.message || 'Error creating budget'); }
+        }
+
+        async function updateSalary() {
+            const body = { salaryAmount: parseFloat(document.getElementById('newSalary').value) };
+            if (!body.salaryAmount) { alert('Enter salary amount'); return; }
+            const res = await fetch(`${API}/api/budget/profile/salary`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (res.ok) { alert('Salary updated!'); loadBudgetStatus(); }
+            else alert('Error updating salary');
+        }
+
+        loadBudgetStatus();
+    </script>
+
+</body>
+</html>

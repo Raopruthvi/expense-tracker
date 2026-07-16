@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expenses</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="bg-blue-600 text-white p-4">
+        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+    </div>
+
+    <div class="bg-white shadow-sm flex overflow-x-auto">
+        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
+        <a href="expenses.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Expenses</a>
+        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
+        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
+        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
+    </div>
+
+    <div class="p-4 space-y-4">
+
+        <!-- Add Expense Form -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <h2 class="font-bold text-gray-700 mb-3">Add Expense</h2>
+            <div class="space-y-3">
+                <input id="description" type="text" placeholder="Description (e.g. Lunch at Pizza Hut)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <input id="amount" type="number" placeholder="Amount (₹)"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                <select id="category" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                    <option value="">Select Category</option>
+                    <option value="FOOD">Food</option>
+                    <option value="SPORTS">Sports</option>
+                    <option value="VEHICLE">Vehicle</option>
+                    <option value="TRIP">Trip</option>
+                    <option value="ONLINE_SHOPPING">Online Shopping</option>
+                    <option value="SUBSCRIPTIONS">Subscriptions</option>
+                    <option value="MISCELLANEOUS">Miscellaneous</option>
+                    <option value="GENERAL">General</option>
+                </select>
+                <input id="deadline" type="date"
+                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+
+                <div id="peopleSection" class="space-y-3">
+                    <select id="paidBy" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                        <option value="">Paid By (optional)</option>
+                    </select>
+                    <select id="owedBy" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                        <option value="">Owed By (optional)</option>
+                    </select>
+                </div>
+
+                <div id="warningBox" class="hidden bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-lg p-3 text-sm"></div>
+
+                <button onclick="addExpense()"
+                    class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
+                    Add Expense
+                </button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="flex gap-2">
+                <button onclick="loadExpenses('all')" id="btn-all"
+                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-blue-600 text-white">All</button>
+                <button onclick="loadExpenses('unsettled')" id="btn-unsettled"
+                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Unsettled</button>
+                <button onclick="loadExpenses('overdue')" id="btn-overdue"
+                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Overdue</button>
+            </div>
+        </div>
+
+        <!-- Expense List -->
+        <div id="expenseList" class="space-y-3"></div>
+
+    </div>
+
+    <script>
+        const API = 'https://expense-tracker-production-8665.up.railway.app';
+        let allPeople = [];
+
+        async function loadPeople() {
+            const res = await fetch(`${API}/api/people`);
+            allPeople = await res.json();
+            const paidBy = document.getElementById('paidBy');
+            const owedBy = document.getElementById('owedBy');
+            allPeople.forEach(p => {
+                paidBy.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+                owedBy.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        }
+
+        async function addExpense() {
+            const description = document.getElementById('description').value;
+            const amount = document.getElementById('amount').value;
+            const category = document.getElementById('category').value;
+            const deadline = document.getElementById('deadline').value;
+            const paidById = document.getElementById('paidBy').value;
+            const owedById = document.getElementById('owedBy').value;
+
+            if (!description || !amount || !category || !deadline) {
+                alert('Please fill in description, amount, category and deadline');
+                return;
+            }
+
+            const expense = {
+                description,
+                amount: parseFloat(amount),
+                category,
+                deadline,
+                settled: false
+            };
+
+            if (paidById) expense.paidBy = { id: parseInt(paidById) };
+            if (owedById) expense.owedBy = { id: parseInt(owedById) };
+
+            try {
+                const res = await fetch(`${API}/api/budget/expense`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(expense)
+                });
+                const data = await res.json();
+
+                if (data.warning) {
+                    const box = document.getElementById('warningBox');
+                    box.textContent = '⚠️ ' + data.warning;
+                    box.classList.remove('hidden');
+                } else {
+                    document.getElementById('warningBox').classList.add('hidden');
+                }
+
+                document.getElementById('description').value = '';
+                document.getElementById('amount').value = '';
+                document.getElementById('category').value = '';
+                document.getElementById('deadline').value = '';
+                document.getElementById('paidBy').value = '';
+                document.getElementById('owedBy').value = '';
+
+                loadExpenses('all');
+            } catch (err) {
+                alert('Error adding expense: ' + err.message);
+            }
+        }
+
+        async function loadExpenses(filter = 'all') {
+            ['all', 'unsettled', 'overdue'].forEach(f => {
+                document.getElementById(`btn-${f}`).className =
+                    'flex-1 py-2 px-3 rounded-lg text-sm font-medium ' +
+                    (f === filter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600');
+            });
+
+            let url = `${API}/api/expenses`;
+            if (filter === 'unsettled') url += '/unsettled';
+            if (filter === 'overdue') url += '/overdue';
+
+            const res = await fetch(url);
+            const expenses = await res.json();
+            const list = document.getElementById('expenseList');
+
+            if (expenses.length === 0) {
+                list.innerHTML = '<div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">No expenses found</div>';
+                return;
+            }
+
+            list.innerHTML = expenses.map(e => `
+                <div class="bg-white rounded-xl shadow p-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="font-medium text-gray-800">${e.description}</p>
+                            <p class="text-2xl font-bold text-blue-600 mt-1">₹${e.amount}</p>
+                            <div class="flex gap-2 mt-2 flex-wrap">
+                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${e.category}</span>
+                                <span class="bg-${e.settled ? 'green' : 'red'}-100 text-${e.settled ? 'green' : 'red'}-700 text-xs px-2 py-1 rounded-full">
+                                    ${e.settled ? '✅ Settled' : '⏳ Pending'}
+                                </span>
+                            </div>
+                            ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
+                            ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
+                            <p class="text-xs text-gray-400 mt-1">Due: ${e.deadline}</p>
+                        </div>
+                        <div class="flex flex-col gap-2 ml-3">
+                            ${!e.settled ? `<button onclick="settle(${e.id})"
+                                class="bg-green-500 text-white text-xs px-3 py-2 rounded-lg">Settle</button>` : ''}
+                            <button onclick="deleteExpense(${e.id})"
+                                class="bg-red-500 text-white text-xs px-3 py-2 rounded-lg">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function settle(id) {
+            await fetch(`${API}/api/expenses/${id}/settle`, { method: 'PUT' });
+            loadExpenses('all');
+        }
+
+        async function deleteExpense(id) {
+            if (!confirm('Delete this expense?')) return;
+            await fetch(`${API}/api/expenses/${id}`, { method: 'DELETE' });
+            loadExpenses('all');
+        }
+
+        loadPeople();
+        loadExpenses('all');
+    </script>
+
+</body>
+</html>
