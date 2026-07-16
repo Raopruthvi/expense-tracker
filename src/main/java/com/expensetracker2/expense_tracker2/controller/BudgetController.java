@@ -36,9 +36,10 @@ public ResponseEntity<FinancialProfile> setupProfile(@RequestBody Map<String, Bi
 	BigDecimal accountBalance=request.get("accountBalance");
 	BigDecimal cashBalance=request.get("cashBalance");
 	BigDecimal salaryAmount=request.get("salaryAmount");
+	BigDecimal initialSavings = request.get("initialSavings");
 	
 	FinancialProfile profile=budgetService.setupProfile(
-			accountBalance, cashBalance, salaryAmount);
+			accountBalance, cashBalance, salaryAmount, initialSavings);
 	
 	return ResponseEntity.status(HttpStatus.CREATED).body(profile);
 }

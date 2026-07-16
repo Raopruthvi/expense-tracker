@@ -24,12 +24,12 @@ public class FinancialProfile {
 		
 	}
 	
-	public FinancialProfile(BigDecimal accountBalance, BigDecimal cashBalance, BigDecimal  salaryAmount) {
+	public FinancialProfile(BigDecimal accountBalance, BigDecimal cashBalance, BigDecimal  salaryAmount, BigDecimal initialSavings) {
 		this.accountBalance=accountBalance;
 		this.cashBalance=cashBalance;
 		this.salaryAmount=salaryAmount;
 		this.remainingSalary=salaryAmount;
-		this.savingsAmount=BigDecimal.ZERO;
+		this.savingsAmount=initialSavings != null ? initialSavings : BigDecimal.ZERO;
 	}
 
 	public Long getId() {

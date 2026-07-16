@@ -27,13 +27,13 @@ public class BudgetService {
 	
 	//------Financial Profile--------
 	
-	public FinancialProfile setupProfile(BigDecimal accountBalance, BigDecimal cashBalance, BigDecimal salaryAmount ) {
+	public FinancialProfile setupProfile(BigDecimal accountBalance, BigDecimal cashBalance, BigDecimal salaryAmount, BigDecimal initialSavings ) {
 		if(!profileRepository.findAll().isEmpty()) {
 			throw new IllegalArgumentException(
 					"Profile already exists. Use update endpoints to modify it.");
 		}
 			FinancialProfile profile=new FinancialProfile(
-					accountBalance, cashBalance, salaryAmount);
+					accountBalance, cashBalance, salaryAmount, initialSavings);
 			return profileRepository.save(profile);
 		
 	}
