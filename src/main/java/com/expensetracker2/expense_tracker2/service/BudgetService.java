@@ -51,6 +51,12 @@ public class BudgetService {
 		profile.setRemainingSalary(newSalary);
 		return profileRepository.save(profile);
 	}
+	
+	
+	
+	public FinancialProfile saveProfile(FinancialProfile profile) {
+	    return profileRepository.save(profile);
+	}
 
 	
 	//-------Monthly Budget----------

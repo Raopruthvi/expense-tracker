@@ -73,6 +73,26 @@
                 </button>
             </div>
         </div>
+		
+		<!-- Edit Balances -->
+		<div class="bg-white rounded-xl shadow p-4">
+		    <h2 class="font-bold text-gray-700 mb-3">Edit Balances</h2>
+		    <div class="space-y-3">
+		        <input id="editAccountBalance" type="number" placeholder="Account Balance (₹)"
+		            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+		        <input id="editCashBalance" type="number" placeholder="Cash Balance (₹)"
+		            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+		        <input id="editSavings" type="number" placeholder="Savings Amount (₹)"
+		            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+		        <input id="editSalary" type="number" placeholder="Salary Amount (₹)"
+		            class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+		        <p class="text-xs text-gray-400">Leave fields blank to keep existing values</p>
+		        <button onclick="updateProfile()"
+		            class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
+		            Update Profile
+		        </button>
+		    </div>
+		</div>
 
     </div>
 
@@ -116,7 +136,8 @@
             const body = {
                 accountBalance: parseFloat(document.getElementById('accountBalance').value),
                 cashBalance: parseFloat(document.getElementById('cashBalance').value),
-                salaryAmount: parseFloat(document.getElementById('salaryAmount').value)
+                salaryAmount: parseFloat(document.getElementById('salaryAmount').value),
+				initialSavings: parseFloat(document.getElementById('initialSavings').value) || 0
             };
             if (!body.accountBalance || !body.cashBalance || !body.salaryAmount) {
                 alert('Fill in all fields'); return;
@@ -147,17 +168,41 @@
             else { const e = await res.json(); alert(e.message || 'Error creating budget'); }
         }
 
-        async function updateSalary() {
-            const body = { salaryAmount: parseFloat(document.getElementById('newSalary').value) };
-            if (!body.salaryAmount) { alert('Enter salary amount'); return; }
-            const res = await fetch(`${API}/api/budget/profile/salary`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) { alert('Salary updated!'); loadBudgetStatus(); }
-            else alert('Error updating salary');
-        }
+		async function updateProfile() {
+		    const body = {};
+		    const accountBalance = document.getElementById('editAccountBalance').value;
+		    const cashBalance = document.getElementById('editCashBalance').value;
+		    const savings = document.getElementById('editSavings').value;
+		    const salary = document.getElementById('editSalary').value;
+
+		    if (accountBalance) body.accountBalance = parseFloat(accountBalance);
+		    if (cashBalance) body.cashBalance = parseFloat(cashBalance);
+		    if (savings) body.savingsAmount = parseFloat(savings);
+		    if (salary) body.salaryAmount = parseFloat(salary);
+
+		    if (Object.keys(body).length === 0) {
+		        alert('Fill in at least one field to update');
+		        return;
+		    }
+
+		    const res = await fetch(`${API}/api/budget/profile/update`, {
+		        method: 'PUT',
+		        headers: { 'Content-Type': 'application/json' },
+		        body: JSON.stringify(body)
+		    });
+
+		    if (res.ok) {
+		        alert('Profile updated successfully!');
+		        document.getElementById('editAccountBalance').value = '';
+		        document.getElementById('editCashBalance').value = '';
+		        document.getElementById('editSavings').value = '';
+		        document.getElementById('editSalary').value = '';
+		        loadBudgetStatus();
+		    } else {
+		        const e = await res.json();
+		        alert(e.message || 'Error updating profile');
+		    }
+		}
 
         loadBudgetStatus();
     </script>

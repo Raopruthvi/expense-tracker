@@ -49,11 +49,24 @@ public ResponseEntity<FinancialProfile> getProfile(){
 	return ResponseEntity.ok(budgetService.getProfile());
 }
 
-@PutMapping("/profile/salary")
-public ResponseEntity<FinancialProfile> updateSalary(
-		@RequestBody Map<String, BigDecimal> request){
-	BigDecimal newSalary=request.get("salaryAmount");
-	return ResponseEntity.ok(budgetService.updateSalary(newSalary));
+@PutMapping("/profile/update")
+public ResponseEntity<FinancialProfile> updateProfile(
+        @RequestBody Map<String, BigDecimal> request) {
+    FinancialProfile profile = budgetService.getProfile();
+
+    if (request.containsKey("accountBalance"))
+        profile.setAccountBalance(request.get("accountBalance"));
+    if (request.containsKey("cashBalance"))
+        profile.setCashBalance(request.get("cashBalance"));
+    if (request.containsKey("savingsAmount"))
+        profile.setSavingsAmount(request.get("savingsAmount"));
+    if (request.containsKey("salaryAmount")) {
+        profile.setSalaryAmount(request.get("salaryAmount"));
+        profile.setRemainingSalary(request.get("salaryAmount"));
+    }
+
+    return ResponseEntity.ok(budgetService.saveProfile(profile));
+
 	
 }
 
