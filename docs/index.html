@@ -107,27 +107,41 @@
 					          });
 
 					          // Load dashboard data
-					          async function loadDashboard() {
-					              try {
-					                  const res = await fetch(`${API}/api/budget/summary`);
-					                  if (!res.ok) throw new Error('No budget setup');
-					                  const data = await res.json();
+							  async function loadDashboard() {
+							      try {
+							          const [summaryRes, budgetRes] = await Promise.all([
+							              fetch(`${API}/api/budget/summary`),
+							              fetch(`${API}/api/budget/monthly/current`)
+							          ]);
 
-					                  document.getElementById('accountBalance').textContent = `₹${data.accountBalance}`;
-					                  document.getElementById('cashBalance').textContent = `₹${data.cashBalance}`;
-					                  document.getElementById('savingsAmount').textContent = `₹${data.savingsAmount}`;
-					                  document.getElementById('remainingSalary').textContent = `₹${data.remainingSalary}`;
-					                  document.getElementById('salaryAmount').textContent = `₹${data.salaryAmount}`;
-					                  document.getElementById('remainingAllowance').textContent = `₹${data.remainingAllowance}`;
-					                  document.getElementById('remainingVehicle').textContent = `₹${data.remainingVehicleAllowance}`;
+							          if (!summaryRes.ok) throw new Error('No budget setup');
+							          const data = await summaryRes.json();
 
-					              } catch (err) {
-					                  document.getElementById('accountBalance').textContent = 'Setup needed';
-					                  document.getElementById('savingsAmount').textContent = '₹0';
-					                  document.getElementById('remainingSalary').textContent = '-';
-					              }
-					          }
+							          document.getElementById('accountBalance').textContent = `₹${data.accountBalance}`;
+							          document.getElementById('cashBalance').textContent = `₹${data.cashBalance}`;
+							          document.getElementById('savingsAmount').textContent = `₹${data.savingsAmount}`;
+							          document.getElementById('remainingSalary').textContent = `₹${data.remainingSalary}`;
+							          document.getElementById('salaryAmount').textContent = `₹${data.salaryAmount}`;
+							          document.getElementById('remainingAllowance').textContent = `₹${data.remainingAllowance}`;
+							          document.getElementById('remainingVehicle').textContent = `₹${data.remainingVehicleAllowance}`;
 
+							          if (budgetRes.ok) {
+							              const budget = await budgetRes.json();
+							              const allowanceSpent = (parseFloat(budget.totalAllowance) - parseFloat(data.remainingAllowance)).toFixed(2);
+							              const vehicleSpent = (parseFloat(budget.vehicleAllowance) - parseFloat(data.remainingVehicleAllowance)).toFixed(2);
+
+							              document.getElementById('remainingAllowance').textContent =
+							                  `₹${budget.totalAllowance} - ₹${allowanceSpent} : ₹${data.remainingAllowance}`;
+							              document.getElementById('remainingVehicle').textContent =
+							                  `₹${budget.vehicleAllowance} - ₹${vehicleSpent} : ₹${data.remainingVehicleAllowance}`;
+							          }
+
+							      } catch (err) {
+							          document.getElementById('accountBalance').textContent = 'Setup needed';
+							          document.getElementById('savingsAmount').textContent = '₹0';
+							          document.getElementById('remainingSalary').textContent = '-';
+							      }
+							  }
 					          loadDashboard();
 					      </script>
 
