@@ -98,35 +98,43 @@
         }
 
 		async function addExpense() {
-		    const description = document.getElementById('description').value;
+		    const description = document.getElementById('description').value.trim();
 		    const amount = document.getElementById('amount').value;
 		    const category = document.getElementById('category').value;
-			const spendingDate = document.getElementById('spendingDate').value;
-			const deadline = document.getElementById('deadline').value;
-		    const paidByName = document.getElementById('paidBy').value;
-		    const owedByName = document.getElementById('owedBy').value;
+		    const spendingDate = document.getElementById('spendingDate').value;
+		    const deadline = document.getElementById('deadline').value;
+		    const paidByName = document.getElementById('paidBy').value.trim();
+		    const owedByName = document.getElementById('owedBy').value.trim();
 
 		    if (!description || !amount || !category || !spendingDate) {
-		        alert('Please fill in description, amount, category and spending date');
+		        alert('Please fill in description, amount, category and date of spending');
 		        return;
 		    }
 
 		    const expenseData = {
-		        description,
+		        description: description,
 		        amount: parseFloat(amount),
-		        category,
-		        spendingDate,
+		        category: category,
+		        spendingDate: spendingDate,
 		        settled: false
 		    };
-			
-			if (deadline) expenseData.deadline = deadline;
 
+		    // Only add deadline if filled
+		    if (deadline) {
+		        expenseData.deadline = deadline;
+		    }
+
+		    // Only add paidBy if name matches a known person
 		    if (paidByName) {
-		        const person = allPeople.find(p => p.name.toLowerCase() === paidByName.toLowerCase());
+		        const person = allPeople.find(p =>
+		            p.name.toLowerCase() === paidByName.toLowerCase());
 		        if (person) expenseData.paidBy = { id: person.id };
 		    }
+
+		    // Only add owedBy if name matches a known person
 		    if (owedByName) {
-		        const person = allPeople.find(p => p.name.toLowerCase() === owedByName.toLowerCase());
+		        const person = allPeople.find(p =>
+		            p.name.toLowerCase() === owedByName.toLowerCase());
 		        if (person) expenseData.owedBy = { id: person.id };
 		    }
 
@@ -136,6 +144,13 @@
 		            headers: { 'Content-Type': 'application/json' },
 		            body: JSON.stringify(expenseData)
 		        });
+
+		        if (!res.ok) {
+		            const err = await res.json();
+		            alert('Error: ' + (err.message || 'Failed to add expense'));
+		            return;
+		        }
+
 		        const data = await res.json();
 
 		        if (data.warning) {
@@ -146,14 +161,17 @@
 		            document.getElementById('warningBox').classList.add('hidden');
 		        }
 
+		        // Clear all fields
 		        document.getElementById('description').value = '';
 		        document.getElementById('amount').value = '';
 		        document.getElementById('category').value = '';
+		        document.getElementById('spendingDate').value = '';
 		        document.getElementById('deadline').value = '';
 		        document.getElementById('paidBy').value = '';
 		        document.getElementById('owedBy').value = '';
 
 		        loadExpenses('all');
+
 		    } catch (err) {
 		        alert('Error adding expense: ' + err.message);
 		    }
