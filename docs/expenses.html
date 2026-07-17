@@ -205,9 +205,12 @@
                             <p class="text-2xl font-bold text-blue-600 mt-1">₹${e.amount}</p>
                             <div class="flex gap-2 mt-2 flex-wrap">
                                 <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${e.category}</span>
-                                <span class="bg-${e.settled ? 'green' : 'red'}-100 text-${e.settled ? 'green' : 'red'}-700 text-xs px-2 py-1 rounded-full">
-                                    ${e.settled ? '✅ Settled' : '⏳ Pending'}
-                                </span>
+								${e.settled ? 
+								    `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">✅ Settled</span>` : 
+								    e.deadline ? 
+								    `<span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">⏳ Pending</span>` : 
+								    ''
+								}
                             </div>
                             ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
                             ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
