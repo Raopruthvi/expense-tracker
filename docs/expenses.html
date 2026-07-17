@@ -177,56 +177,66 @@
 		    }
 		}
 
-        async function loadExpenses(filter = 'all') {
-            ['all', 'unsettled', 'overdue'].forEach(f => {
-                document.getElementById(`btn-${f}`).className =
-                    'flex-1 py-2 px-3 rounded-lg text-sm font-medium ' +
-                    (f === filter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600');
-            });
+		async function loadExpenses(filter = 'all') {
+		    ['all', 'unsettled', 'overdue'].forEach(f => {
+		        document.getElementById(`btn-${f}`).className =
+		            'flex-1 py-2 px-3 rounded-lg text-sm font-medium ' +
+		            (f === filter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600');
+		    });
 
-            let url = `${API}/api/expenses`;
-            if (filter === 'unsettled') url += '/unsettled';
-            if (filter === 'overdue') url += '/overdue';
+		    const res = await fetch(`${API}/api/expenses`);
+		    let expenses = await res.json();
 
-            const res = await fetch(url);
-            const expenses = await res.json();
-            const list = document.getElementById('expenseList');
+		    const today = new Date();
+		    today.setHours(0, 0, 0, 0);
 
-            if (expenses.length === 0) {
-                list.innerHTML = '<div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">No expenses found</div>';
-                return;
-            }
+		    if (filter === 'unsettled') {
+		        expenses = expenses.filter(e => !e.settled && e.deadline && e.owedBy);
+		    } else if (filter === 'overdue') {
+		        expenses = expenses.filter(e => {
+		            if (!e.deadline || e.settled) return false;
+		            const deadline = new Date(e.deadline);
+		            return deadline < today;
+		        });
+		    }
 
-            list.innerHTML = expenses.map(e => `
-                <div class="bg-white rounded-xl shadow p-4">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-800">${e.description}</p>
-                            <p class="text-2xl font-bold text-blue-600 mt-1">₹${e.amount}</p>
-                            <div class="flex gap-2 mt-2 flex-wrap">
-                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${e.category}</span>
-								${e.settled ? 
-								    `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">✅ Settled</span>` : 
-								    e.deadline ? 
-								    `<span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">⏳ Pending</span>` : 
-								    ''
-								}
-                            </div>
-                            ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
-                            ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
-							${e.spendingDate ? `<p class="text-xs text-gray-400 mt-1">Spent on: ${e.spendingDate}</p>` : ''}
-							${e.deadline ? `<p class="text-xs text-gray-400">Due: ${e.deadline}</p>` : ''}
-                        </div>
-                        <div class="flex flex-col gap-2 ml-3">
-                            ${!e.settled ? `<button onclick="settle(${e.id})"
-                                class="bg-green-500 text-white text-xs px-3 py-2 rounded-lg">Settle</button>` : ''}
-                            <button onclick="deleteExpense(${e.id})"
-                                class="bg-red-500 text-white text-xs px-3 py-2 rounded-lg">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
+		    const list = document.getElementById('expenseList');
+
+		    if (expenses.length === 0) {
+		        list.innerHTML = '<div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">No expenses found</div>';
+		        return;
+		    }
+
+		    list.innerHTML = expenses.map(e => `
+		        <div class="bg-white rounded-xl shadow p-4">
+		            <div class="flex justify-between items-start">
+		                <div class="flex-1">
+		                    <p class="font-medium text-gray-800">${e.description}</p>
+		                    <p class="text-2xl font-bold text-blue-600 mt-1">₹${e.amount}</p>
+		                    <div class="flex gap-2 mt-2 flex-wrap">
+		                        <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${e.category}</span>
+		                        ${e.settled ?
+		                            `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">✅ Settled</span>` :
+		                            e.deadline ?
+		                            `<span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">⏳ Pending</span>` :
+		                            ''
+		                        }
+		                    </div>
+		                    ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
+		                    ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
+		                    ${e.spendingDate ? `<p class="text-xs text-gray-400 mt-1">Spent on: ${e.spendingDate}</p>` : ''}
+		                    ${e.deadline ? `<p class="text-xs text-gray-400">Due: ${e.deadline}</p>` : ''}
+		                </div>
+		                <div class="flex flex-col gap-2 ml-3">
+		                    ${!e.settled && e.deadline && e.owedBy ? `<button onclick="settle(${e.id})"
+		                        class="bg-green-500 text-white text-xs px-3 py-2 rounded-lg">Settle</button>` : ''}
+		                    <button onclick="deleteExpense(${e.id})"
+		                        class="bg-red-500 text-white text-xs px-3 py-2 rounded-lg">Delete</button>
+		                </div>
+		            </div>
+		        </div>
+		    `).join('');
+		}
 
         async function settle(id) {
             await fetch(`${API}/api/expenses/${id}/settle`, { method: 'PUT' });
