@@ -1,6 +1,12 @@
 package com.expensetracker2.expense_tracker2.service;
 
 import com.expensetracker2.expense_tracker2.exception.ResourceNotFoundException;
+import com.expensetracker2.expense_tracker2.repository.FinancialProfileRepository;
+import com.expensetracker2.expense_tracker2.repository.MonthlyBudgetRepository;
+import com.expensetracker2.expense_tracker2.model.FinancialProfile;
+import com.expensetracker2.expense_tracker2.model.MonthlyBudget;
+import com.expensetracker2.expense_tracker2.model.Category;
+import java.math.BigDecimal;
 import com.expensetracker2.expense_tracker2.model.*;
 import com.expensetracker2.expense_tracker2.repository.*;
 
@@ -15,10 +21,17 @@ import org.springframework.stereotype.Service;
 public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
 	private final PersonRepository personRepository;
-	
-	public ExpenseService(ExpenseRepository expenseRepository, PersonRepository personRepository) {
-		this.expenseRepository=expenseRepository;
-		this.personRepository=personRepository;
+	private final FinancialProfileRepository financialProfileRepository;
+	private final MonthlyBudgetRepository monthlyBudgetRepository;
+
+	public ExpenseService(ExpenseRepository expenseRepository,
+	                      PersonRepository personRepository,
+	                      FinancialProfileRepository financialProfileRepository,
+	                      MonthlyBudgetRepository monthlyBudgetRepository) {
+	    this.expenseRepository = expenseRepository;
+	    this.personRepository = personRepository;
+	    this.financialProfileRepository = financialProfileRepository;
+	    this.monthlyBudgetRepository = monthlyBudgetRepository;
 	}
 	
 	//---------Person methods------------
@@ -52,9 +65,62 @@ public class ExpenseService {
 	}
 	
 	public void deleteExpense(Long id) {
-		 expenseRepository.deleteById(id);
+	    Expense expense = getExpenseById(id);
+
+	    if (!expense.isSettled()) {
+	        try {
+	            FinancialProfile profile = financialProfileRepository.findAll()
+	                .stream().findFirst().orElse(null);
+
+	            int currentMonth = java.time.LocalDate.now().getMonthValue();
+	            int currentYear = java.time.LocalDate.now().getYear();
+	            MonthlyBudget budget = monthlyBudgetRepository
+	                .findByMonthAndYearAndClosedFalse(currentMonth, currentYear)
+	                .orElse(null);
+
+	            if (profile != null && budget != null) {
+	                BigDecimal amount = expense.getAmount();
+	                Category category = expense.getCategory();
+
+	                profile.setAccountBalance(profile.getAccountBalance().add(amount));
+
+	                if (category == Category.VEHICLE) {
+	                    BigDecimal newVehicle = budget.getRemainingVehicleAllowance().add(amount);
+	                    if (newVehicle.compareTo(budget.getVehicleAllowance()) > 0) {
+	                        BigDecimal overflow = newVehicle.subtract(budget.getVehicleAllowance());
+	                        budget.setRemainingVehicleAllowance(budget.getVehicleAllowance());
+	                        profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
+	                    } else {
+	                        budget.setRemainingVehicleAllowance(newVehicle);
+	                    }
+	                } else if (category == Category.FOOD ||
+	                           category == Category.SPORTS ||
+	                           category == Category.MISCELLANEOUS ||
+	                           category == Category.ONLINE_SHOPPING ||
+	                           category == Category.SUBSCRIPTIONS ||
+	                           category == Category.TRIP) {
+	                    BigDecimal newAllowance = budget.getRemainingAllowance().add(amount);
+	                    if (newAllowance.compareTo(budget.getTotalAllowance()) > 0) {
+	                        BigDecimal overflow = newAllowance.subtract(budget.getTotalAllowance());
+	                        budget.setRemainingAllowance(budget.getTotalAllowance());
+	                        profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
+	                    } else {
+	                        budget.setRemainingAllowance(newAllowance);
+	                    }
+	                } else {
+	                    profile.setRemainingSalary(profile.getRemainingSalary().add(amount));
+	                }
+
+	                financialProfileRepository.save(profile);
+	                monthlyBudgetRepository.save(budget);
+	            }
+	        } catch (Exception e) {
+	            // No profile or budget — just delete
+	        }
+	    }
+
+	    expenseRepository.deleteById(id);
 	}
-	
 	//------Business Logic--------
 	
 	public List<Expense> getUnsettledExpenses(){

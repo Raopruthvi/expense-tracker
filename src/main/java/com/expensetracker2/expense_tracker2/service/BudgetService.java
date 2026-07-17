@@ -82,6 +82,10 @@ public class BudgetService {
 						"No active budget found for this month"));
 	}
 	
+	public MonthlyBudget saveBudget(MonthlyBudget budget) {
+	    return budgetRepository.save(budget);
+	}
+	
 	//------Record an expense with budget deduction--------
 	
 	public ExpenseResult recordExpense(Expense expense) {
