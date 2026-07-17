@@ -41,8 +41,13 @@
                     <option value="MISCELLANEOUS">Miscellaneous</option>
                     <option value="GENERAL">General</option>
                 </select>
-                <input id="deadline" type="date"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+				<input id="spendingDate" type="date"
+				    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+				<label class="text-xs text-gray-400 -mt-2 ml-1">Date of Spending</label>
+
+				<input id="deadline" type="date"
+				    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+				<label class="text-xs text-gray-400 -mt-2 ml-1">Settlement Deadline (optional)</label>
 
 					<div id="peopleSection" class="space-y-3">
 					    <input id="paidBy" type="text" placeholder="Paid By - Name (optional)"
@@ -96,12 +101,13 @@
 		    const description = document.getElementById('description').value;
 		    const amount = document.getElementById('amount').value;
 		    const category = document.getElementById('category').value;
-		    const deadline = document.getElementById('deadline').value;
+			const spendingDate = document.getElementById('spendingDate').value;
+			const deadline = document.getElementById('deadline').value;
 		    const paidByName = document.getElementById('paidBy').value;
 		    const owedByName = document.getElementById('owedBy').value;
 
-		    if (!description || !amount || !category || !deadline) {
-		        alert('Please fill in description, amount, category and deadline');
+		    if (!description || !amount || !category || !spendingDate) {
+		        alert('Please fill in description, amount, category and spending date');
 		        return;
 		    }
 
@@ -109,9 +115,11 @@
 		        description,
 		        amount: parseFloat(amount),
 		        category,
-		        deadline,
+		        spendingDate,
 		        settled: false
 		    };
+			
+			if (deadline) expenseData.deadline = deadline;
 
 		    if (paidByName) {
 		        const person = allPeople.find(p => p.name.toLowerCase() === paidByName.toLowerCase());
@@ -185,7 +193,8 @@
                             </div>
                             ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
                             ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
-                            <p class="text-xs text-gray-400 mt-1">Due: ${e.deadline}</p>
+							${e.spendingDate ? `<p class="text-xs text-gray-400 mt-1">Spent on: ${e.spendingDate}</p>` : ''}
+							${e.deadline ? `<p class="text-xs text-gray-400">Due: ${e.deadline}</p>` : ''}
                         </div>
                         <div class="flex flex-col gap-2 ml-3">
                             ${!e.settled ? `<button onclick="settle(${e.id})"

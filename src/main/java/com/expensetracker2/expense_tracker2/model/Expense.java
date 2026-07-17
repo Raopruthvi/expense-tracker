@@ -24,7 +24,7 @@ public class Expense {
 	@DecimalMin(value="0.01", message="amount must be greater than zero")
 	private BigDecimal amount;
 	
-	@NotNull(message="Deadline cannot be null")
+	private LocalDate spendingDate;
 	private LocalDate deadline;
 	private boolean settled;
 	
@@ -72,6 +72,14 @@ public class Expense {
 
 	public void setAmount(BigDecimal amount) {
 		this.amount = amount;
+	}
+	
+	public LocalDate getSpendingDate() {
+	    return spendingDate;
+	}
+
+	public void setSpendingDate(LocalDate spendingDate) {
+	    this.spendingDate = spendingDate;
 	}
 
 	public LocalDate getDeadline() {
