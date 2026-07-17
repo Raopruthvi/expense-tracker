@@ -20,7 +20,7 @@ public class Expense {
 	@NotBlank(message="Description cannot be null")
 	private String description;
 	
-	@NotBlank(message="Amount cannot be null")
+	@NotNull(message="Amount cannot be null")
 	@DecimalMin(value="0.01", message="amount must be greater than zero")
 	private BigDecimal amount;
 	
