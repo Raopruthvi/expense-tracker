@@ -92,67 +92,64 @@
             });
         }
 
-        async function addExpense() {
-            const description = document.getElementById('description').value;
-            const amount = document.getElementById('amount').value;
-            const category = document.getElementById('category').value;
-            const deadline = document.getElementById('deadline').value;
-			const paidByName = document.getElementById('paidBy').value;
-			const owedByName = document.getElementById('owedBy').value;
+		async function addExpense() {
+		    const description = document.getElementById('description').value;
+		    const amount = document.getElementById('amount').value;
+		    const category = document.getElementById('category').value;
+		    const deadline = document.getElementById('deadline').value;
+		    const paidByName = document.getElementById('paidBy').value;
+		    const owedByName = document.getElementById('owedBy').value;
 
-			if (paidByName) {
-			    const person = allPeople.find(p => p.name.toLowerCase() === paidByName.toLowerCase());
-			    if (person) expense.paidBy = { id: person.id };
-			}
-			if (owedByName) {
-			    const person = allPeople.find(p => p.name.toLowerCase() === owedByName.toLowerCase());
-			    if (person) expense.owedBy = { id: person.id };
-			}
+		    if (!description || !amount || !category || !deadline) {
+		        alert('Please fill in description, amount, category and deadline');
+		        return;
+		    }
 
-            if (!description || !amount || !category || !deadline) {
-                alert('Please fill in description, amount, category and deadline');
-                return;
-            }
+		    const expenseData = {
+		        description,
+		        amount: parseFloat(amount),
+		        category,
+		        deadline,
+		        settled: false
+		    };
 
-            const expense = {
-                description,
-                amount: parseFloat(amount),
-                category,
-                deadline,
-                settled: false
-            };
+		    if (paidByName) {
+		        const person = allPeople.find(p => p.name.toLowerCase() === paidByName.toLowerCase());
+		        if (person) expenseData.paidBy = { id: person.id };
+		    }
+		    if (owedByName) {
+		        const person = allPeople.find(p => p.name.toLowerCase() === owedByName.toLowerCase());
+		        if (person) expenseData.owedBy = { id: person.id };
+		    }
 
-            if (paidById) expense.paidBy = { id: parseInt(paidById) };
-            if (owedById) expense.owedBy = { id: parseInt(owedById) };
+		    try {
+		        const res = await fetch(`${API}/api/budget/expense`, {
+		            method: 'POST',
+		            headers: { 'Content-Type': 'application/json' },
+		            body: JSON.stringify(expenseData)
+		        });
+		        const data = await res.json();
 
-            try {
-                const res = await fetch(`${API}/api/budget/expense`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(expense)
-                });
-                const data = await res.json();
+		        if (data.warning) {
+		            const box = document.getElementById('warningBox');
+		            box.textContent = '⚠️ ' + data.warning;
+		            box.classList.remove('hidden');
+		        } else {
+		            document.getElementById('warningBox').classList.add('hidden');
+		        }
 
-                if (data.warning) {
-                    const box = document.getElementById('warningBox');
-                    box.textContent = '⚠️ ' + data.warning;
-                    box.classList.remove('hidden');
-                } else {
-                    document.getElementById('warningBox').classList.add('hidden');
-                }
+		        document.getElementById('description').value = '';
+		        document.getElementById('amount').value = '';
+		        document.getElementById('category').value = '';
+		        document.getElementById('deadline').value = '';
+		        document.getElementById('paidBy').value = '';
+		        document.getElementById('owedBy').value = '';
 
-                document.getElementById('description').value = '';
-                document.getElementById('amount').value = '';
-                document.getElementById('category').value = '';
-                document.getElementById('deadline').value = '';
-                document.getElementById('paidBy').value = '';
-                document.getElementById('owedBy').value = '';
-
-                loadExpenses('all');
-            } catch (err) {
-                alert('Error adding expense: ' + err.message);
-            }
-        }
+		        loadExpenses('all');
+		    } catch (err) {
+		        alert('Error adding expense: ' + err.message);
+		    }
+		}
 
         async function loadExpenses(filter = 'all') {
             ['all', 'unsettled', 'overdue'].forEach(f => {
