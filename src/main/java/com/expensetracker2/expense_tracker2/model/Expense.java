@@ -39,6 +39,8 @@ public class Expense {
 	@Enumerated(EnumType.STRING)
 	@NotNull(message="Category cannot be null")
 	private Category category;
+	private String owedByName;
+	private String paidByName;
 	
 	public Expense() {
 		
@@ -121,6 +123,12 @@ public class Expense {
 	public void setCategory(Category category) {
 		this.category = category;
 	}
+	
+	public String getOwedByName() { return owedByName; }
+	public void setOwedByName(String owedByName) { this.owedByName = owedByName; }
+
+	public String getPaidByName() { return paidByName; }
+	public void setPaidByName(String paidByName) { this.paidByName = paidByName; }
 	
 	
 	

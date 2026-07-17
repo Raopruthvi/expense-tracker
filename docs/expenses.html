@@ -124,19 +124,18 @@
 		        expenseData.deadline = deadline;
 		    }
 
-		    // Only add paidBy if name matches a known person
-		    if (paidByName) {
-		        const person = allPeople.find(p =>
-		            p.name.toLowerCase() === paidByName.toLowerCase());
-		        if (person) expenseData.paidBy = { id: person.id };
-		    }
-
-		    // Only add owedBy if name matches a known person
-		    if (owedByName) {
-		        const person = allPeople.find(p =>
-		            p.name.toLowerCase() === owedByName.toLowerCase());
-		        if (person) expenseData.owedBy = { id: person.id };
-		    }
+			if (paidByName) {
+			    expenseData.paidByName = paidByName;
+			    const person = allPeople.find(p =>
+			        p.name.toLowerCase() === paidByName.toLowerCase());
+			    if (person) expenseData.paidBy = { id: person.id };
+			}
+			if (owedByName) {
+			    expenseData.owedByName = owedByName;
+			    const person = allPeople.find(p =>
+			        p.name.toLowerCase() === owedByName.toLowerCase());
+			    if (person) expenseData.owedBy = { id: person.id };
+			}
 
 		    try {
 		        const res = await fetch(`${API}/api/budget/expense`, {
@@ -222,15 +221,17 @@
 		                            ''
 		                        }
 		                    </div>
-		                    ${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` : ''}
-		                    ${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` : ''}
+							${e.paidBy ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidBy.name}</p>` :
+							  e.paidByName ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${e.paidByName}</p>` : ''}
+							${e.owedBy ? `<p class="text-xs text-gray-500">Owed by: ${e.owedBy.name}</p>` :
+							  e.owedByName ? `<p class="text-xs text-gray-500">Owed by: ${e.owedByName}</p>` : ''}
 		                    ${e.spendingDate ? `<p class="text-xs text-gray-400 mt-1">Spent on: ${e.spendingDate}</p>` : ''}
 		                    ${e.deadline ? `<p class="text-xs text-gray-400">Due: ${e.deadline}</p>` : ''}
 		                </div>
 		                <div class="flex flex-col gap-2 ml-3">
-		                    ${!e.settled && e.deadline && e.owedBy ? `<button onclick="settle(${e.id})"
-		                        class="bg-green-500 text-white text-xs px-3 py-2 rounded-lg">Settle</button>` : ''}
-		                    <button onclick="deleteExpense(${e.id})"
+							${!e.settled && e.deadline && (e.owedBy || e.owedByName) ?
+							    `<button onclick="settle(${e.id})"
+							        class="bg-green-500 text-white text-xs px-3 py-2 rounded-lg">Settle</button>` : ''}		                    <button onclick="deleteExpense(${e.id})"
 		                        class="bg-red-500 text-white text-xs px-3 py-2 rounded-lg">Delete</button>
 		                </div>
 		            </div>
