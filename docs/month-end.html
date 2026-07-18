@@ -7,11 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
-
     <div class="bg-blue-600 text-white p-4">
         <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
     </div>
-
     <div class="bg-white shadow-sm flex overflow-x-auto">
         <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
         <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
@@ -19,45 +17,42 @@
         <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
         <a href="month-end.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Month End</a>
     </div>
-
     <div class="p-4 space-y-4">
-
-        <!-- Warning Card -->
         <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
             <p class="text-orange-800 font-medium text-sm">⚠️ Month End Process</p>
-            <p class="text-orange-700 text-sm mt-1">This will close the current month, move remaining allowances and salary to savings, and reset for next month. This cannot be undone.</p>
+            <p class="text-orange-700 text-sm mt-1">Closes the current month, moves remaining allowances and salary to savings, and resets for next month. Cannot be undone.</p>
         </div>
-
-        <!-- Current Month Summary -->
         <div id="summary" class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-400 text-sm">Loading summary...</p>
+            <p class="text-gray-400 text-sm">Loading...</p>
         </div>
-
-        <!-- Close Month Button -->
         <button onclick="closeMonth()"
             class="w-full bg-orange-600 text-white rounded-xl p-4 font-bold text-base">
-            Close This Month
+            Close This Month & Move to Savings
         </button>
-
-        <!-- Result -->
         <div id="result" class="hidden bg-white rounded-xl shadow p-4"></div>
-
     </div>
-
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
 
         async function loadSummary() {
             try {
-                const res = await fetch(`${API}/api/budget/summary`);
-                if (!res.ok) throw new Error();
-                const d = await res.json();
-
+                const [summaryRes, budgetRes] = await Promise.all([
+                    fetch(`${API}/api/budget/summary`),
+                    fetch(`${API}/api/budget/monthly/current`)
+                ]);
+                if (!summaryRes.ok || !budgetRes.ok) throw new Error();
+                const d = await summaryRes.json();
+                const b = await budgetRes.json();
+                const total = (
+                    parseFloat(d.remainingAllowance) +
+                    parseFloat(d.remainingVehicleAllowance) +
+                    parseFloat(d.remainingSalary)
+                ).toFixed(2);
                 document.getElementById('summary').innerHTML = `
                     <h2 class="font-bold text-gray-700 mb-3">This Month's Summary</h2>
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Remaining Allowance</span>
+                            <span class="text-gray-500">Remaining General Allowance</span>
                             <span class="font-medium text-green-600">₹${d.remainingAllowance}</span>
                         </div>
                         <div class="flex justify-between text-sm">
@@ -70,18 +65,17 @@
                         </div>
                         <div class="border-t pt-2 flex justify-between text-sm font-bold">
                             <span class="text-gray-700">Will be added to Savings</span>
-                            <span class="text-green-600">₹${(
-                                parseFloat(d.remainingAllowance) +
-                                parseFloat(d.remainingVehicleAllowance) +
-                                parseFloat(d.remainingSalary)
-                            ).toFixed(2)}</span>
+                            <span class="text-green-600">₹${total}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">Current Total Savings</span>
                             <span class="font-medium text-blue-600">₹${d.savingsAmount}</span>
                         </div>
-                    </div>
-                `;
+                        <div class="flex justify-between text-sm font-bold">
+                            <span class="text-gray-700">New Total Savings Will Be</span>
+                            <span class="text-blue-600">₹${(parseFloat(d.savingsAmount) + parseFloat(total)).toFixed(2)}</span>
+                        </div>
+                    </div>`;
             } catch {
                 document.getElementById('summary').innerHTML =
                     '<p class="text-gray-400 text-sm">No active budget found for this month.</p>';
@@ -89,8 +83,7 @@
         }
 
         async function closeMonth() {
-            if (!confirm('Are you sure you want to close this month? This cannot be undone.')) return;
-
+            if (!confirm('Close this month? This cannot be undone.')) return;
             try {
                 const res = await fetch(`${API}/api/budget/month-end`, { method: 'POST' });
                 if (!res.ok) {
@@ -99,14 +92,13 @@
                     return;
                 }
                 const d = await res.json();
-
                 const result = document.getElementById('result');
                 result.classList.remove('hidden');
                 result.innerHTML = `
                     <h2 class="font-bold text-green-700 mb-3">✅ Month Closed Successfully</h2>
                     <div class="space-y-2">
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">From Allowance</span>
+                            <span class="text-gray-500">From General Allowance</span>
                             <span class="font-medium">₹${d.allowanceSaved}</span>
                         </div>
                         <div class="flex justify-between text-sm">
@@ -126,10 +118,10 @@
                             <span class="text-blue-600">₹${d.newTotalSavings}</span>
                         </div>
                     </div>
-                    <a href="budget.html" class="block mt-4 bg-blue-600 text-white rounded-lg p-3 text-center text-sm font-medium">
-                        Create Next Month's Budget
-                    </a>
-                `;
+                    <a href="budget.html"
+                        class="block mt-4 bg-blue-600 text-white rounded-lg p-3 text-center text-sm font-medium">
+                        Create Next Month's Budget →
+                    </a>`;
             } catch (err) {
                 alert('Error: ' + err.message);
             }
@@ -137,6 +129,5 @@
 
         loadSummary();
     </script>
-
 </body>
 </html>

@@ -82,7 +82,28 @@ public class BudgetService {
 						"No active budget found for this month"));
 	}
 	
+	
+
 	public MonthlyBudget saveBudget(MonthlyBudget budget) {
+	    return budgetRepository.save(budget);
+	}
+
+	public MonthlyBudget updateBudget(BigDecimal totalAllowance,
+	                                   BigDecimal vehicleAllowance) {
+	    MonthlyBudget budget = getCurrentBudget();
+
+	    if (totalAllowance != null) {
+	        BigDecimal diff = totalAllowance.subtract(budget.getTotalAllowance());
+	        budget.setTotalAllowance(totalAllowance);
+	        budget.setRemainingAllowance(budget.getRemainingAllowance().add(diff));
+	    }
+	    if (vehicleAllowance != null) {
+	        BigDecimal diff = vehicleAllowance.subtract(budget.getVehicleAllowance());
+	        budget.setVehicleAllowance(vehicleAllowance);
+	        budget.setRemainingVehicleAllowance(
+	            budget.getRemainingVehicleAllowance().add(diff));
+	    }
+
 	    return budgetRepository.save(budget);
 	}
 	

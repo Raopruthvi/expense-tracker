@@ -1,151 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8"">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Expense Tracker</title> 
-		<script src="https://cdn.tailwindcss.com"></script>
-	</head>
-	<body class="bg-gray-100 min-h-screen">
-		
-		<!-- Header -->
-		   <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
-		       <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
-		       <span id="currentDate" class="text-sm"></span>
-		   </div>
-		   
-		   <!-- Navigation -->
-		      <div class="bg-white shadow-sm flex overflow-x-auto">
-		          <a href="index.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Dashboard</a>
-		          <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
-		          <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
-		          <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
-		          <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
-		      </div>
-			  
-			  <!-- Content -->
-			      <div class="p-4 space-y-4">
-
-			          <!-- Account Balance Card -->
-			          <div class="bg-white rounded-xl shadow p-4">
-			              <p class="text-gray-500 text-sm">Account Balance</p>
-			              <p id="accountBalance" class="text-3xl font-bold text-blue-600 mt-1">Loading...</p>
-			              <p class="text-gray-500 text-sm mt-2">Cash: <span id="cashBalance" class="font-medium text-gray-700">-</span></p>
-			          </div>
-					  
-					   <!-- Savings Card -->
-					          <div class="bg-white rounded-xl shadow p-4">
-					              <p class="text-gray-500 text-sm">Total Savings</p>
-					              <p id="savingsAmount" class="text-3xl font-bold text-green-600 mt-1">Loading...</p>
-					          </div>
-
-					          <!-- Salary Card -->
-					          <div class="bg-white rounded-xl shadow p-4 flex justify-between items-center">
-					              <div>
-					                  <p class="text-gray-500 text-sm">Remaining Salary</p>
-					                  <p id="remainingSalary" class="text-2xl font-bold text-purple-600 mt-1">Loading...</p>
-					              </div>
-					              <div class="text-right">
-					                  <p class="text-gray-500 text-sm">Monthly Salary</p>
-					                  <p id="salaryAmount" class="text-lg font-medium text-gray-700 mt-1">-</p>
-					              </div>
-					          </div>
-
-					          <!-- Allowances Card -->
-					          <div class="bg-white rounded-xl shadow p-4">
-					              <p class="text-gray-700 font-medium mb-3">Monthly Allowances</p>
-					              <div class="space-y-3">
-					                  <div>
-					                      <div class="flex justify-between text-sm mb-1">
-					                          <span class="text-gray-500">General Allowance</span>
-					                          <span id="remainingAllowance" class="font-medium">-</span>
-					                      </div>
-					                      <div class="bg-gray-200 rounded-full h-2">
-					                          <div id="allowanceBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
-					                      </div>
-					                  </div>
-					                  <div>
-					                      <div class="flex justify-between text-sm mb-1">
-					                          <span class="text-gray-500">Vehicle Allowance</span>
-					                          <span id="remainingVehicle" class="font-medium">-</span>
-					                      </div>
-					                      <div class="bg-gray-200 rounded-full h-2">
-					                          <div id="vehicleBar" class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
-					                      </div>
-					                  </div>
-					              </div>
-					          </div>
-
-					          <!-- Quick Actions -->
-					          <div class="grid grid-cols-2 gap-3">
-					              <a href="expenses.html" class="bg-blue-600 text-white rounded-xl p-4 text-center">
-					                  <div class="text-2xl mb-1">➕</div>
-					                  <div class="text-sm font-medium">Add Expense</div>
-					              </a>
-					              <a href="people.html" class="bg-purple-600 text-white rounded-xl p-4 text-center">
-					                  <div class="text-2xl mb-1">👥</div>
-					                  <div class="text-sm font-medium">View People</div>
-					              </a>
-					              <a href="budget.html" class="bg-green-600 text-white rounded-xl p-4 text-center">
-					                  <div class="text-2xl mb-1">📊</div>
-					                  <div class="text-sm font-medium">Budget</div>
-					              </a>
-					              <a href="month-end.html" class="bg-orange-600 text-white rounded-xl p-4 text-center">
-					                  <div class="text-2xl mb-1">📅</div>
-					                  <div class="text-sm font-medium">Month End</div>
-					              </a>
-					          </div>
-
-					      </div>
-
-					      <script>
-					          const API = 'https://expense-tracker-production-8665.up.railway.app';
-
-					          // Set current date
-					          document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-					              day: 'numeric', month: 'short', year: 'numeric'
-					          });
-
-					          // Load dashboard data
-							  async function loadDashboard() {
-							      try {
-							          const [summaryRes, budgetRes] = await Promise.all([
-							              fetch(`${API}/api/budget/summary`),
-							              fetch(`${API}/api/budget/monthly/current`)
-							          ]);
-
-							          if (!summaryRes.ok) throw new Error('No budget setup');
-							          const data = await summaryRes.json();
-
-							          document.getElementById('accountBalance').textContent = `₹${data.accountBalance}`;
-							          document.getElementById('cashBalance').textContent = `₹${data.cashBalance}`;
-							          document.getElementById('savingsAmount').textContent = `₹${data.savingsAmount}`;
-							          document.getElementById('remainingSalary').textContent = `₹${data.remainingSalary}`;
-							          document.getElementById('salaryAmount').textContent = `₹${data.salaryAmount}`;
-							          document.getElementById('remainingAllowance').textContent = `₹${data.remainingAllowance}`;
-							          document.getElementById('remainingVehicle').textContent = `₹${data.remainingVehicleAllowance}`;
-
-							          if (budgetRes.ok) {
-							              const budget = await budgetRes.json();
-							              const allowanceSpent = (parseFloat(budget.totalAllowance) - parseFloat(data.remainingAllowance)).toFixed(2);
-							              const vehicleSpent = (parseFloat(budget.vehicleAllowance) - parseFloat(data.remainingVehicleAllowance)).toFixed(2);
-
-							              document.getElementById('remainingAllowance').textContent =
-							                  `₹${budget.totalAllowance} - ₹${allowanceSpent} : ₹${data.remainingAllowance}`;
-							              document.getElementById('remainingVehicle').textContent =
-							                  `₹${budget.vehicleAllowance} - ₹${vehicleSpent} : ₹${data.remainingVehicleAllowance}`;
-							          }
-
-							      } catch (err) {
-							          document.getElementById('accountBalance').textContent = 'Setup needed';
-							          document.getElementById('savingsAmount').textContent = '₹0';
-							          document.getElementById('remainingSalary').textContent = '-';
-							      }
-							  }
-					          loadDashboard();
-					      </script>
-
-					  </body>
-					  </html>
-					  
-		
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+        <span id="currentDate" class="text-sm"></span>
+    </div>
+    <div class="bg-white shadow-sm flex overflow-x-auto">
+        <a href="index.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Dashboard</a>
+        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
+        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
+        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
+        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
+    </div>
+    <div class="p-4 space-y-4">
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-gray-500 text-sm">Account Balance</p>
+            <p id="accountBalance" class="text-3xl font-bold text-blue-600 mt-1">Loading...</p>
+            <p class="text-gray-500 text-sm mt-2">Cash: <span id="cashBalance" class="font-medium text-gray-700">-</span></p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-gray-500 text-sm">Total Savings</p>
+            <p id="savingsAmount" class="text-3xl font-bold text-green-600 mt-1">Loading...</p>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4 flex justify-between items-center">
+            <div>
+                <p class="text-gray-500 text-sm">Remaining Salary</p>
+                <p id="remainingSalary" class="text-2xl font-bold text-purple-600 mt-1">-</p>
+            </div>
+            <div class="text-right">
+                <p class="text-gray-500 text-sm">Monthly Salary</p>
+                <p id="salaryAmount" class="text-lg font-medium text-gray-700 mt-1">-</p>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <p class="text-gray-700 font-medium mb-3">Monthly Allowances</p>
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-500">General Allowance</span>
+                        <span id="remainingAllowance" class="font-medium text-right">-</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div id="allowanceBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-500">Vehicle Allowance</span>
+                        <span id="remainingVehicle" class="font-medium text-right">-</span>
+                    </div>
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div id="vehicleBar" class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <a href="expenses.html" class="bg-blue-600 text-white rounded-xl p-4 text-center">
+                <div class="text-2xl mb-1">➕</div>
+                <div class="text-sm font-medium">Add Expense</div>
+            </a>
+            <a href="people.html" class="bg-purple-600 text-white rounded-xl p-4 text-center">
+                <div class="text-2xl mb-1">👥</div>
+                <div class="text-sm font-medium">View People</div>
+            </a>
+            <a href="budget.html" class="bg-green-600 text-white rounded-xl p-4 text-center">
+                <div class="text-2xl mb-1">📊</div>
+                <div class="text-sm font-medium">Budget</div>
+            </a>
+            <a href="month-end.html" class="bg-orange-600 text-white rounded-xl p-4 text-center">
+                <div class="text-2xl mb-1">📅</div>
+                <div class="text-sm font-medium">Month End</div>
+            </a>
+        </div>
+    </div>
+    <script>
+        const API = 'https://expense-tracker-production-8665.up.railway.app';
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
+            day: 'numeric', month: 'short', year: 'numeric'
+        });
+        async function loadDashboard() {
+            try {
+                const [summaryRes, budgetRes] = await Promise.all([
+                    fetch(`${API}/api/budget/summary`),
+                    fetch(`${API}/api/budget/monthly/current`)
+                ]);
+                if (!summaryRes.ok) throw new Error('No budget setup');
+                const data = await summaryRes.json();
+                document.getElementById('accountBalance').textContent = `₹${data.accountBalance}`;
+                document.getElementById('cashBalance').textContent = `₹${data.cashBalance}`;
+                document.getElementById('savingsAmount').textContent = `₹${data.savingsAmount}`;
+                document.getElementById('remainingSalary').textContent = `₹${data.remainingSalary}`;
+                document.getElementById('salaryAmount').textContent = `₹${data.salaryAmount}`;
+                if (budgetRes.ok) {
+                    const budget = await budgetRes.json();
+                    const allowanceSpent = (parseFloat(budget.totalAllowance) - parseFloat(data.remainingAllowance)).toFixed(2);
+                    const vehicleSpent = (parseFloat(budget.vehicleAllowance) - parseFloat(data.remainingVehicleAllowance)).toFixed(2);
+                    document.getElementById('remainingAllowance').textContent =
+                        `₹${budget.totalAllowance} - ₹${allowanceSpent} : ₹${data.remainingAllowance}`;
+                    document.getElementById('remainingVehicle').textContent =
+                        `₹${budget.vehicleAllowance} - ₹${vehicleSpent} : ₹${data.remainingVehicleAllowance}`;
+                    const allowancePct = (parseFloat(data.remainingAllowance) / parseFloat(budget.totalAllowance) * 100).toFixed(0);
+                    const vehiclePct = (parseFloat(data.remainingVehicleAllowance) / parseFloat(budget.vehicleAllowance) * 100).toFixed(0);
+                    document.getElementById('allowanceBar').style.width = `${allowancePct}%`;
+                    document.getElementById('vehicleBar').style.width = `${vehiclePct}%`;
+                } else {
+                    document.getElementById('remainingAllowance').textContent = `₹${data.remainingAllowance}`;
+                    document.getElementById('remainingVehicle').textContent = `₹${data.remainingVehicleAllowance}`;
+                }
+            } catch (err) {
+                document.getElementById('accountBalance').textContent = 'Setup needed';
+                document.getElementById('savingsAmount').textContent = '₹0';
+                document.getElementById('remainingSalary').textContent = '-';
+            }
+        }
+        loadDashboard();
+    </script>
+</body>
+</html>

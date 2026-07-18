@@ -1,10 +1,7 @@
 package com.expensetracker2.expense_tracker2.model;
 
 import java.math.BigDecimal;
-
-
 import java.time.LocalDate;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -12,128 +9,69 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Expense {
-	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private long id;
-	
-	@NotBlank(message="Description cannot be null")
-	private String description;
-	
-	@NotNull(message="Amount cannot be null")
-	@DecimalMin(value="0.01", message="amount must be greater than zero")
-	private BigDecimal amount;
-	
-	private LocalDate spendingDate;
-	private LocalDate deadline;
-	private boolean settled;
-	
-	@ManyToOne
-	@JoinColumn(name="paid_by_id") //Tells hibernate to name the columns as that
-	private Person paidBy;
-	
-	@ManyToOne
-	@JoinColumn(name="owed_by_id")
-	private Person owedBy;
-	
-	@Enumerated(EnumType.STRING)
-	@NotNull(message="Category cannot be null")
-	private Category category;
-	private String owedByName;
-	private String paidByName;
-	
-	public Expense() {
-		
-	}
-	
-	public Expense(String description, BigDecimal amount, LocalDate deadline, Person paidBy, Person owedBy, Category category) {
-		this.description=description;
-		this.amount=amount;
-		this.deadline=deadline;
-		this.settled=false;
-		this.paidBy=paidBy;
-		this.owedBy=owedBy;
-		this.category=category;
-	}
 
-	public long getId() {
-		return id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public String getDescription() {
-		return description;
-	}
+    @NotBlank(message = "Description cannot be blank")
+    private String description;
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    @NotNull(message = "Amount cannot be null")
+    @DecimalMin(value = "0.01", message = "Amount must be greater than zero")
+    private BigDecimal amount;
 
-	public BigDecimal getAmount() {
-		return amount;
-	}
+    @NotNull(message = "Spending date cannot be null")
+    private LocalDate spendingDate;
 
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
-	
-	public LocalDate getSpendingDate() {
-	    return spendingDate;
-	}
+    private LocalDate deadline;
+    private boolean settled;
+    private String paidByName;
+    private String owedByName;
 
-	public void setSpendingDate(LocalDate spendingDate) {
-	    this.spendingDate = spendingDate;
-	}
+    @ManyToOne
+    @JoinColumn(name = "paid_by_id")
+    private Person paidBy;
 
-	public LocalDate getDeadline() {
-		return deadline;
-	}
+    @ManyToOne
+    @JoinColumn(name = "owed_by_id")
+    private Person owedBy;
 
-	public void setDeadline(LocalDate deadline) {
-		this.deadline = deadline;
-	}
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "Category cannot be null")
+    private Category category;
 
-	public boolean isSettled() {
-		return settled;
-	}
+    public Expense() {}
 
-	public void setSettled(boolean settled) {
-		this.settled = settled;
-	}
+    public Long getId() { return id; }
 
-	public Person getPaidBy() {
-		return paidBy;
-	}
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-	public void setPaidBy(Person paidBy) {
-		this.paidBy = paidBy;
-	}
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-	public Person getOwedBy() {
-		return owedBy;
-	}
+    public LocalDate getSpendingDate() { return spendingDate; }
+    public void setSpendingDate(LocalDate spendingDate) { this.spendingDate = spendingDate; }
 
-	public void setOwedBy(Person owedBy) {
-		this.owedBy = owedBy;
-	}
+    public LocalDate getDeadline() { return deadline; }
+    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
 
-	public Category getCategory() {
-		return category;
-	}
+    public boolean isSettled() { return settled; }
+    public void setSettled(boolean settled) { this.settled = settled; }
 
-	public void setCategory(Category category) {
-		this.category = category;
-	}
-	
-	public String getOwedByName() { return owedByName; }
-	public void setOwedByName(String owedByName) { this.owedByName = owedByName; }
+    public String getPaidByName() { return paidByName; }
+    public void setPaidByName(String paidByName) { this.paidByName = paidByName; }
 
-	public String getPaidByName() { return paidByName; }
-	public void setPaidByName(String paidByName) { this.paidByName = paidByName; }
-	
-	
-	
-	
-	
-	
+    public String getOwedByName() { return owedByName; }
+    public void setOwedByName(String owedByName) { this.owedByName = owedByName; }
 
+    public Person getPaidBy() { return paidBy; }
+    public void setPaidBy(Person paidBy) { this.paidBy = paidBy; }
+
+    public Person getOwedBy() { return owedBy; }
+    public void setOwedBy(Person owedBy) { this.owedBy = owedBy; }
+
+    public Category getCategory() { return category; }
+    public void setCategory(Category category) { this.category = category; }
 }

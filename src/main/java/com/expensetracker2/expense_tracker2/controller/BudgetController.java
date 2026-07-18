@@ -89,6 +89,14 @@ public ResponseEntity<MonthlyBudget> getCurrentBudget(){
 	return ResponseEntity.ok(budgetService.getCurrentBudget());
 }
 
+@PutMapping("/monthly/update")
+public ResponseEntity<MonthlyBudget> updateBudget(
+        @RequestBody Map<String, BigDecimal> request) {
+    BigDecimal totalAllowance = request.get("totalAllowance");
+    BigDecimal vehicleAllowance = request.get("vehicleAllowance");
+    return ResponseEntity.ok(budgetService.updateBudget(totalAllowance, vehicleAllowance));
+}
+
 //--------Record expense with budget deduction-------
 @PostMapping("/expense")
 public ResponseEntity<Map<String, Object>> recordExpense(@Valid @RequestBody Expense expense){
