@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.expensetracker2.expense_tracker2.repository.ExpenseRepository;
 import com.expensetracker2.expense_tracker2.repository.FinancialProfileRepository;
 import com.expensetracker2.expense_tracker2.repository.MonthlyBudgetRepository;
+import com.expensetracker2.expense_tracker2.repository.PersonRepository;
 import com.expensetracker2.expense_tracker2.exception.ResourceNotFoundException;
 import com.expensetracker2.expense_tracker2.model.*;
 
@@ -16,17 +17,25 @@ public class BudgetService {
 	private final FinancialProfileRepository profileRepository;
 	private final MonthlyBudgetRepository budgetRepository;
 	private final ExpenseRepository expenseRepository;
+	private final PersonRepository personRepository;
 	
 	
 
 	
 	
-	public BudgetService(FinancialProfileRepository profileRepository, MonthlyBudgetRepository budgetRepository, ExpenseRepository expenseRepository) {
-		this.profileRepository=profileRepository;
-		this.budgetRepository=budgetRepository;
-		this.expenseRepository=expenseRepository;	
-	}
+	public BudgetService(FinancialProfileRepository profileRepository,
+            MonthlyBudgetRepository budgetRepository,
+            ExpenseRepository expenseRepository,
+            PersonRepository personRepository) {
+this.profileRepository = profileRepository;
+this.budgetRepository = budgetRepository;
+this.expenseRepository = expenseRepository;
+this.personRepository = personRepository;
+}
 	
+	public void resetBudget() {
+	    budgetRepository.deleteAll();
+	}
 	//------Financial Profile--------
 	
 	public FinancialProfile setupProfile(BigDecimal accountBalance, BigDecimal cashBalance, BigDecimal salaryAmount, BigDecimal initialSavings ) {
@@ -89,6 +98,10 @@ public class BudgetService {
 	public MonthlyBudget saveBudget(MonthlyBudget budget) {
 	    return budgetRepository.save(budget);
 	}
+	
+	public void resetProfile() {
+	    profileRepository.deleteAll();
+	}
 
 	public MonthlyBudget updateBudget(BigDecimal totalAllowance,
 	                                   BigDecimal vehicleAllowance) {
@@ -111,35 +124,46 @@ public class BudgetService {
 	
 	//------Record an expense with budget deduction--------
 	
-	private static final String OWNER_NAME = "Mani";
+	
+
+	private static final String OWNER = "Mani";
 
 	public ExpenseResult recordExpense(Expense expense) {
 	    FinancialProfile profile = getProfile();
 	    MonthlyBudget budget = getCurrentBudget();
 	    String warning = null;
 
-	    Category category = expense.getCategory();
-	    BigDecimal amount = expense.getAmount();
-	    boolean isCashExpense = expense.isCash();
+	    // Auto-create people
+	    if (expense.getPaidByName() != null && !expense.getPaidByName().isBlank()) {
+	        expenseRepository.findAll(); // just to ensure context
+	    }
 
-	    boolean maniIsPaying = expense.getPaidByName() == null ||
-	                           expense.getPaidByName().equalsIgnoreCase(OWNER_NAME) ||
-	                           expense.getPaidBy() == null;
+	    String paidByName = expense.getPaidByName() != null ?
+	            expense.getPaidByName() : "";
+	    String owedByName = expense.getOwedByName() != null ?
+	            expense.getOwedByName() : "";
 
-	    boolean maniOwes = expense.getOwedByName() != null &&
-	                       expense.getOwedByName().equalsIgnoreCase(OWNER_NAME);
+	    boolean maniIsPaying = paidByName.isEmpty() ||
+	                           paidByName.equalsIgnoreCase(OWNER);
+	    boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
 
-	    // Only deduct when Mani is paying (not when someone else paid and Mani owes)
+	    // Only deduct immediately if Mani is paying and he doesn't owe someone
+	    // (if maniOwes → deduct happens at settle time)
 	    if (maniIsPaying && !maniOwes) {
-	        // Deduct from account or cash balance
-	        if (isCashExpense) {
-	            profile.setCashBalance(profile.getCashBalance().subtract(amount));
+	        // Deduct balance
+	        if (expense.isCash()) {
+	            profile.setCashBalance(
+	                profile.getCashBalance().subtract(expense.getAmount()));
+	            profile.setAccountBalance(
+	                profile.getAccountBalance().subtract(expense.getAmount()));
 	        } else {
-	            profile.setAccountBalance(profile.getAccountBalance().subtract(amount));
+	            profile.setAccountBalance(
+	                profile.getAccountBalance().subtract(expense.getAmount()));
 	        }
 
-	        // Deduct from allowance pool
-	        warning = deductFromAllowance(profile, budget, category, amount);
+	        // Deduct allowance
+	        warning = deductFromAllowance(profile, budget,
+	                  expense.getCategory(), expense.getAmount());
 	    }
 
 	    profileRepository.save(profile);
@@ -149,8 +173,10 @@ public class BudgetService {
 	    return new ExpenseResult(saved, warning, profile.getRemainingSalary());
 	}
 
-	private String deductFromAllowance(FinancialProfile profile, MonthlyBudget budget,
-	                                    Category category, BigDecimal amount) {
+	private String deductFromAllowance(FinancialProfile profile,
+	                                    MonthlyBudget budget,
+	                                    Category category,
+	                                    BigDecimal amount) {
 	    String warning = null;
 	    if (category == Category.VEHICLE) {
 	        BigDecimal remaining = budget.getRemainingVehicleAllowance();
@@ -159,9 +185,10 @@ public class BudgetService {
 	        } else {
 	            BigDecimal overflow = amount.subtract(remaining);
 	            budget.setRemainingVehicleAllowance(BigDecimal.ZERO);
-	            profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+	            profile.setRemainingSalary(
+	                profile.getRemainingSalary().subtract(overflow));
 	            warning = "Vehicle allowance exhausted. ₹" + overflow +
-	                      " deducted from salary. Remaining salary: ₹" +
+	                      " deducted from salary. Remaining: ₹" +
 	                      profile.getRemainingSalary();
 	        }
 	    } else if (category == Category.FOOD ||
@@ -176,14 +203,15 @@ public class BudgetService {
 	        } else {
 	            BigDecimal overflow = amount.subtract(remaining);
 	            budget.setRemainingAllowance(BigDecimal.ZERO);
-	            profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+	            profile.setRemainingSalary(
+	                profile.getRemainingSalary().subtract(overflow));
 	            warning = "Monthly allowance exhausted. ₹" + overflow +
-	                      " deducted from salary. Remaining salary: ₹" +
+	                      " deducted from salary. Remaining: ₹" +
 	                      profile.getRemainingSalary();
 	        }
 	    } else {
-	        // GENERAL — deduct from salary
-	        profile.setRemainingSalary(profile.getRemainingSalary().subtract(amount));
+	        profile.setRemainingSalary(
+	            profile.getRemainingSalary().subtract(amount));
 	    }
 	    return warning;
 	}
@@ -267,6 +295,13 @@ public class BudgetService {
 			this.remainingAllowance=budget.getRemainingAllowance();
 			this.remainingVehicleAllowance=budget.getRemainingVehicleAllowance();
 		}
+	}
+	
+	public void resetAll() {
+	    expenseRepository.deleteAll();
+	    personRepository.deleteAll();
+	    profileRepository.deleteAll();
+	    budgetRepository.deleteAll();
 	}
 	
 }

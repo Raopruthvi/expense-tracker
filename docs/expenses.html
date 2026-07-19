@@ -76,14 +76,6 @@
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
         const OWNER = 'mani';
-        let allPeople = [];
-
-        async function loadPeople() {
-            try {
-                const res = await fetch(`${API}/api/people`);
-                allPeople = await res.json();
-            } catch {}
-        }
 
         async function addExpense() {
             const description = document.getElementById('description').value.trim();
@@ -110,18 +102,8 @@
             };
 
             if (deadline) expenseData.deadline = deadline;
-            if (paidByName) {
-                expenseData.paidByName = paidByName;
-                const person = allPeople.find(p =>
-                    p.name.toLowerCase() === paidByName.toLowerCase());
-                if (person) expenseData.paidBy = { id: person.id };
-            }
-            if (owedByName) {
-                expenseData.owedByName = owedByName;
-                const person = allPeople.find(p =>
-                    p.name.toLowerCase() === owedByName.toLowerCase());
-                if (person) expenseData.owedBy = { id: person.id };
-            }
+            if (paidByName) expenseData.paidByName = paidByName;
+            if (owedByName) expenseData.owedByName = owedByName;
 
             try {
                 const res = await fetch(`${API}/api/budget/expense`, {
@@ -190,7 +172,7 @@
                 const hasSettlement = e.deadline && (e.owedBy || e.owedByName);
                 const maniOwes = owedName.toLowerCase() === OWNER;
                 const settleLabel = maniOwes ? '💸 Pay Back' : '✅ Collect';
-                const settleBtnColor = maniOwes ? 'bg-red-500' : 'bg-green-500';
+                const settleBtnColor = maniOwes ? 'bg-orange-500' : 'bg-green-500';
 
                 return `
                 <div class="bg-white rounded-xl shadow p-4">
@@ -237,7 +219,6 @@
             loadExpenses('all');
         }
 
-        loadPeople();
         loadExpenses('all');
     </script>
 </body>

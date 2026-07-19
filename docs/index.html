@@ -22,7 +22,7 @@
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-gray-500 text-sm">Account Balance</p>
             <p id="accountBalance" class="text-3xl font-bold text-blue-600 mt-1">Loading...</p>
-            <p class="text-gray-500 text-sm mt-2">Cash: <span id="cashBalance" class="font-medium text-gray-700">-</span></p>
+            <p class="text-gray-500 text-sm mt-2">Cash in hand: <span id="cashBalance" class="font-medium text-gray-700">-</span></p>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <p class="text-gray-500 text-sm">Total Savings</p>
@@ -44,19 +44,19 @@
                 <div>
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-500">General Allowance</span>
-                        <span id="remainingAllowance" class="font-medium text-right">-</span>
+                        <span id="remainingAllowance" class="font-medium text-right text-xs">-</span>
                     </div>
                     <div class="bg-gray-200 rounded-full h-2">
-                        <div id="allowanceBar" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                        <div id="allowanceBar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between text-sm mb-1">
                         <span class="text-gray-500">Vehicle Allowance</span>
-                        <span id="remainingVehicle" class="font-medium text-right">-</span>
+                        <span id="remainingVehicle" class="font-medium text-right text-xs">-</span>
                     </div>
                     <div class="bg-gray-200 rounded-full h-2">
-                        <div id="vehicleBar" class="bg-orange-500 h-2 rounded-full" style="width: 0%"></div>
+                        <div id="vehicleBar" class="bg-orange-500 h-2 rounded-full transition-all" style="width:0%"></div>
                     </div>
                 </div>
             </div>
@@ -68,7 +68,7 @@
             </a>
             <a href="people.html" class="bg-purple-600 text-white rounded-xl p-4 text-center">
                 <div class="text-2xl mb-1">👥</div>
-                <div class="text-sm font-medium">View People</div>
+                <div class="text-sm font-medium">People</div>
             </a>
             <a href="budget.html" class="bg-green-600 text-white rounded-xl p-4 text-center">
                 <div class="text-2xl mb-1">📊</div>
@@ -91,33 +91,32 @@
                     fetch(`${API}/api/budget/summary`),
                     fetch(`${API}/api/budget/monthly/current`)
                 ]);
-                if (!summaryRes.ok) throw new Error('No budget setup');
-                const data = await summaryRes.json();
-                document.getElementById('accountBalance').textContent = `₹${data.accountBalance}`;
-                document.getElementById('cashBalance').textContent = `₹${data.cashBalance}`;
-                document.getElementById('savingsAmount').textContent = `₹${data.savingsAmount}`;
-                document.getElementById('remainingSalary').textContent = `₹${data.remainingSalary}`;
-                document.getElementById('salaryAmount').textContent = `₹${data.salaryAmount}`;
+                if (!summaryRes.ok) throw new Error('No setup');
+                const d = await summaryRes.json();
+                document.getElementById('accountBalance').textContent = `₹${d.accountBalance}`;
+                document.getElementById('cashBalance').textContent = `₹${d.cashBalance}`;
+                document.getElementById('savingsAmount').textContent = `₹${d.savingsAmount}`;
+                document.getElementById('remainingSalary').textContent = `₹${d.remainingSalary}`;
+                document.getElementById('salaryAmount').textContent = `₹${d.salaryAmount}`;
                 if (budgetRes.ok) {
-                    const budget = await budgetRes.json();
-                    const allowanceSpent = (parseFloat(budget.totalAllowance) - parseFloat(data.remainingAllowance)).toFixed(2);
-                    const vehicleSpent = (parseFloat(budget.vehicleAllowance) - parseFloat(data.remainingVehicleAllowance)).toFixed(2);
+                    const b = await budgetRes.json();
+                    const aSpent = (parseFloat(b.totalAllowance) - parseFloat(d.remainingAllowance)).toFixed(2);
+                    const vSpent = (parseFloat(b.vehicleAllowance) - parseFloat(d.remainingVehicleAllowance)).toFixed(2);
                     document.getElementById('remainingAllowance').textContent =
-                        `₹${budget.totalAllowance} - ₹${allowanceSpent} : ₹${data.remainingAllowance}`;
+                        `₹${b.totalAllowance} - ₹${aSpent} : ₹${d.remainingAllowance}`;
                     document.getElementById('remainingVehicle').textContent =
-                        `₹${budget.vehicleAllowance} - ₹${vehicleSpent} : ₹${data.remainingVehicleAllowance}`;
-                    const allowancePct = (parseFloat(data.remainingAllowance) / parseFloat(budget.totalAllowance) * 100).toFixed(0);
-                    const vehiclePct = (parseFloat(data.remainingVehicleAllowance) / parseFloat(budget.vehicleAllowance) * 100).toFixed(0);
-                    document.getElementById('allowanceBar').style.width = `${allowancePct}%`;
-                    document.getElementById('vehicleBar').style.width = `${vehiclePct}%`;
+                        `₹${b.vehicleAllowance} - ₹${vSpent} : ₹${d.remainingVehicleAllowance}`;
+                    const aPct = Math.min(100, parseFloat(d.remainingAllowance) / parseFloat(b.totalAllowance) * 100);
+                    const vPct = Math.min(100, parseFloat(d.remainingVehicleAllowance) / parseFloat(b.vehicleAllowance) * 100);
+                    document.getElementById('allowanceBar').style.width = `${aPct}%`;
+                    document.getElementById('vehicleBar').style.width = `${vPct}%`;
                 } else {
-                    document.getElementById('remainingAllowance').textContent = `₹${data.remainingAllowance}`;
-                    document.getElementById('remainingVehicle').textContent = `₹${data.remainingVehicleAllowance}`;
+                    document.getElementById('remainingAllowance').textContent = `₹${d.remainingAllowance}`;
+                    document.getElementById('remainingVehicle').textContent = `₹${d.remainingVehicleAllowance}`;
                 }
-            } catch (err) {
+            } catch {
                 document.getElementById('accountBalance').textContent = 'Setup needed';
                 document.getElementById('savingsAmount').textContent = '₹0';
-                document.getElementById('remainingSalary').textContent = '-';
             }
         }
         loadDashboard();

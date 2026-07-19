@@ -126,4 +126,22 @@ public ResponseEntity<FinancialSummary> getSummary(){
 	return ResponseEntity.ok(budgetService.getSummary());
 }
 
+@DeleteMapping("/reset")
+public ResponseEntity<Void> resetAll() {
+    budgetService.resetAll();
+    return ResponseEntity.noContent().build();
+}
+
+@DeleteMapping("/monthly/reset")
+public ResponseEntity<Void> resetBudget() {
+    budgetService.resetBudget();
+    return ResponseEntity.noContent().build();
+}
+
+@DeleteMapping("/profile/reset")
+public ResponseEntity<Void> resetProfile() {
+    budgetService.resetProfile();
+    return ResponseEntity.noContent().build();
+}
+
 }

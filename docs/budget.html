@@ -23,70 +23,46 @@
             <p class="text-gray-400 text-sm">Loading...</p>
         </div>
 
+        <!-- Financial Profile -->
         <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="font-bold text-gray-700 mb-3">Setup Financial Profile</h2>
-            <p class="text-xs text-gray-400 mb-3">Only needed once. Use Edit below to update values.</p>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-gray-700">Financial Profile</h2>
+                <button onclick="resetProfile()"
+                    class="text-xs text-red-500 border border-red-300 px-3 py-1 rounded-lg">Reset</button>
+            </div>
+            <p class="text-xs text-gray-400 mb-3">Fill all fields to setup or update. Leave blank to keep existing.</p>
             <div class="space-y-3">
                 <input id="accountBalance" type="number" placeholder="Account Balance (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="cashBalance" type="number" placeholder="Cash Balance (₹)"
+                <input id="cashBalance" type="number" placeholder="Cash in Hand (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
                 <input id="salaryAmount" type="number" placeholder="Monthly Salary (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="initialSavings" type="number" placeholder="Existing Savings (₹) - optional"
+                <input id="savingsAmount" type="number" placeholder="Current Savings (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="setupProfile()"
+                <button onclick="saveProfile()"
                     class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Setup Profile
+                    Save Profile
                 </button>
             </div>
         </div>
 
+        <!-- Monthly Budget -->
         <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="font-bold text-gray-700 mb-3">Edit Profile Balances</h2>
-            <p class="text-xs text-gray-400 mb-3">Leave blank to keep existing value.</p>
-            <div class="space-y-3">
-                <input id="editAccountBalance" type="number" placeholder="Account Balance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="editCashBalance" type="number" placeholder="Cash Balance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="editSavings" type="number" placeholder="Savings Amount (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="editSalary" type="number" placeholder="Salary Amount (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="updateProfile()"
-                    class="w-full bg-indigo-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Update Profile
-                </button>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-gray-700">Monthly Budget</h2>
+                <button onclick="resetBudget()"
+                    class="text-xs text-red-500 border border-red-300 px-3 py-1 rounded-lg">Reset</button>
             </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="font-bold text-gray-700 mb-3">Create Monthly Budget</h2>
-            <p class="text-xs text-gray-400 mb-3">Create once per month at the start.</p>
+            <p class="text-xs text-gray-400 mb-3">Set or update this month's allowances.</p>
             <div class="space-y-3">
-                <input id="totalAllowance" type="number" placeholder="Total Monthly Allowance (₹)"
+                <input id="totalAllowance" type="number" placeholder="General Allowance (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
                 <input id="vehicleAllowance" type="number" placeholder="Vehicle Allowance (₹)"
                     class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="createBudget()"
+                <button onclick="saveBudget()"
                     class="w-full bg-green-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Create Budget
-                </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="font-bold text-gray-700 mb-3">Edit Monthly Budget</h2>
-            <p class="text-xs text-gray-400 mb-3">Remaining allowance adjusts by the difference. Leave blank to keep existing.</p>
-            <div class="space-y-3">
-                <input id="editTotalAllowance" type="number" placeholder="New Total Allowance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="editVehicleAllowance" type="number" placeholder="New Vehicle Allowance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="updateBudget()"
-                    class="w-full bg-orange-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Update Budget
+                    Save Budget
                 </button>
             </div>
         </div>
@@ -111,11 +87,11 @@
                     budgetHtml = `
                         <div class="bg-blue-50 rounded-lg p-3">
                             <p class="text-xs text-gray-500">General Allowance</p>
-                            <p class="font-bold text-blue-600">₹${b.totalAllowance} - ₹${aSpent} : ₹${d.remainingAllowance}</p>
+                            <p class="font-bold text-blue-600 text-sm">₹${b.totalAllowance} - ₹${aSpent} : ₹${d.remainingAllowance}</p>
                         </div>
                         <div class="bg-orange-50 rounded-lg p-3">
                             <p class="text-xs text-gray-500">Vehicle Allowance</p>
-                            <p class="font-bold text-orange-600">₹${b.vehicleAllowance} - ₹${vSpent} : ₹${d.remainingVehicleAllowance}</p>
+                            <p class="font-bold text-orange-600 text-sm">₹${b.vehicleAllowance} - ₹${vSpent} : ₹${d.remainingVehicleAllowance}</p>
                         </div>`;
                 }
                 document.getElementById('budgetStatus').innerHTML = `
@@ -125,6 +101,10 @@
                             <p class="text-xs text-gray-500">Account Balance</p>
                             <p class="font-bold text-blue-600">₹${d.accountBalance}</p>
                         </div>
+                        <div class="bg-yellow-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-500">Cash in Hand</p>
+                            <p class="font-bold text-yellow-600">₹${d.cashBalance}</p>
+                        </div>
                         <div class="bg-green-50 rounded-lg p-3">
                             <p class="text-xs text-gray-500">Savings</p>
                             <p class="font-bold text-green-600">₹${d.savingsAmount}</p>
@@ -133,96 +113,112 @@
                             <p class="text-xs text-gray-500">Remaining Salary</p>
                             <p class="font-bold text-purple-600">₹${d.remainingSalary}</p>
                         </div>
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Monthly Salary</p>
-                            <p class="font-bold text-gray-600">₹${d.salaryAmount}</p>
-                        </div>
                         ${budgetHtml}
                     </div>`;
             } catch {
                 document.getElementById('budgetStatus').innerHTML =
-                    '<p class="text-gray-400 text-sm">No profile set up yet.</p>';
+                    '<p class="text-gray-400 text-sm">No profile set up yet. Use the form below.</p>';
             }
         }
 
-        async function setupProfile() {
-            const body = {
-                accountBalance: parseFloat(document.getElementById('accountBalance').value),
-                cashBalance: parseFloat(document.getElementById('cashBalance').value),
-                salaryAmount: parseFloat(document.getElementById('salaryAmount').value),
-                initialSavings: parseFloat(document.getElementById('initialSavings').value) || 0
-            };
-            if (!body.accountBalance || !body.cashBalance || !body.salaryAmount) {
-                alert('Fill in account balance, cash balance and salary'); return;
+        async function saveProfile() {
+            const a = document.getElementById('accountBalance').value;
+            const c = document.getElementById('cashBalance').value;
+            const s = document.getElementById('salaryAmount').value;
+            const sav = document.getElementById('savingsAmount').value;
+
+            // Check if profile exists
+            const checkRes = await fetch(`${API}/api/budget/profile`);
+
+            if (!checkRes.ok) {
+                // Setup new profile
+                if (!a || !c || !s) { alert('Fill account balance, cash and salary to setup'); return; }
+                const res = await fetch(`${API}/api/budget/profile/setup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accountBalance: parseFloat(a),
+                        cashBalance: parseFloat(c),
+                        salaryAmount: parseFloat(s),
+                        initialSavings: sav ? parseFloat(sav) : 0
+                    })
+                });
+                if (res.ok) { alert('Profile created!'); clearProfileFields(); loadBudgetStatus(); }
+                else { const e = await res.json(); alert(e.message || 'Error'); }
+            } else {
+                // Update existing
+                const body = {};
+                if (a) body.accountBalance = parseFloat(a);
+                if (c) body.cashBalance = parseFloat(c);
+                if (s) body.salaryAmount = parseFloat(s);
+                if (sav) body.savingsAmount = parseFloat(sav);
+                if (Object.keys(body).length === 0) { alert('Fill at least one field'); return; }
+                const res = await fetch(`${API}/api/budget/profile/update`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok) { alert('Profile updated!'); clearProfileFields(); loadBudgetStatus(); }
+                else { const e = await res.json(); alert(e.message || 'Error'); }
             }
-            const res = await fetch(`${API}/api/budget/profile/setup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) { alert('Profile set up!'); loadBudgetStatus(); }
-            else { const e = await res.json(); alert(e.message || 'Error'); }
         }
 
-        async function updateProfile() {
-            const body = {};
-            const a = document.getElementById('editAccountBalance').value;
-            const c = document.getElementById('editCashBalance').value;
-            const s = document.getElementById('editSavings').value;
-            const sal = document.getElementById('editSalary').value;
-            if (a) body.accountBalance = parseFloat(a);
-            if (c) body.cashBalance = parseFloat(c);
-            if (s) body.savingsAmount = parseFloat(s);
-            if (sal) body.salaryAmount = parseFloat(sal);
-            if (Object.keys(body).length === 0) { alert('Fill at least one field'); return; }
-            const res = await fetch(`${API}/api/budget/profile/update`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) {
-                alert('Profile updated!');
-                document.getElementById('editAccountBalance').value = '';
-                document.getElementById('editCashBalance').value = '';
-                document.getElementById('editSavings').value = '';
-                document.getElementById('editSalary').value = '';
-                loadBudgetStatus();
-            } else { const e = await res.json(); alert(e.message || 'Error'); }
+        async function saveBudget() {
+            const t = document.getElementById('totalAllowance').value;
+            const v = document.getElementById('vehicleAllowance').value;
+            if (!t || !v) { alert('Fill both allowance fields'); return; }
+
+            const checkRes = await fetch(`${API}/api/budget/monthly/current`);
+
+            if (!checkRes.ok) {
+                // Create new budget
+                const res = await fetch(`${API}/api/budget/monthly`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        totalAllowance: parseFloat(t),
+                        vehicleAllowance: parseFloat(v)
+                    })
+                });
+                if (res.ok) { alert('Budget created!'); clearBudgetFields(); loadBudgetStatus(); }
+                else { const e = await res.json(); alert(e.message || 'Error'); }
+            } else {
+                // Update existing
+                const res = await fetch(`${API}/api/budget/monthly/update`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        totalAllowance: parseFloat(t),
+                        vehicleAllowance: parseFloat(v)
+                    })
+                });
+                if (res.ok) { alert('Budget updated!'); clearBudgetFields(); loadBudgetStatus(); }
+                else { const e = await res.json(); alert(e.message || 'Error'); }
+            }
         }
 
-        async function createBudget() {
-            const body = {
-                totalAllowance: parseFloat(document.getElementById('totalAllowance').value),
-                vehicleAllowance: parseFloat(document.getElementById('vehicleAllowance').value)
-            };
-            if (!body.totalAllowance || !body.vehicleAllowance) { alert('Fill in both fields'); return; }
-            const res = await fetch(`${API}/api/budget/monthly`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) { alert('Budget created!'); loadBudgetStatus(); }
-            else { const e = await res.json(); alert(e.message || 'Error'); }
+        async function resetProfile() {
+            if (!confirm('Reset financial profile? This deletes your profile but keeps expenses.')) return;
+            await fetch(`${API}/api/budget/profile/reset`, { method: 'DELETE' });
+            alert('Profile reset. Set up a new one below.');
+            loadBudgetStatus();
         }
 
-        async function updateBudget() {
-            const body = {};
-            const t = document.getElementById('editTotalAllowance').value;
-            const v = document.getElementById('editVehicleAllowance').value;
-            if (t) body.totalAllowance = parseFloat(t);
-            if (v) body.vehicleAllowance = parseFloat(v);
-            if (Object.keys(body).length === 0) { alert('Fill at least one field'); return; }
-            const res = await fetch(`${API}/api/budget/monthly/update`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-            if (res.ok) {
-                alert('Budget updated!');
-                document.getElementById('editTotalAllowance').value = '';
-                document.getElementById('editVehicleAllowance').value = '';
-                loadBudgetStatus();
-            } else { const e = await res.json(); alert(e.message || 'Error'); }
+        async function resetBudget() {
+            if (!confirm('Reset this month\'s budget? This cannot be undone.')) return;
+            await fetch(`${API}/api/budget/monthly/reset`, { method: 'DELETE' });
+            alert('Budget reset. Create a new one below.');
+            loadBudgetStatus();
+        }
+
+        function clearProfileFields() {
+            ['accountBalance','cashBalance','salaryAmount','savingsAmount']
+                .forEach(id => document.getElementById(id).value = '');
+        }
+
+        function clearBudgetFields() {
+            ['totalAllowance','vehicleAllowance']
+                .forEach(id => document.getElementById(id).value = '');
         }
 
         loadBudgetStatus();

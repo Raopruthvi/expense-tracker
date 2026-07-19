@@ -1,10 +1,12 @@
 package com.expensetracker2.expense_tracker2.controller;
 
+import com.expensetracker2.expense_tracker2.model.Expense;
 import com.expensetracker2.expense_tracker2.model.Person;
 
 import com.expensetracker2.expense_tracker2.service.*;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,33 @@ public class PersonController {
 				"Others owe this person: ₹%s | This person owes others: ₹%s | Net balance: ₹%s",owedTo, owedBy, net
 				);
 		return ResponseEntity.ok(summary);
+	}
+	
+	@GetMapping("/{id}/expenses")
+	public ResponseEntity<List<Map<String, Object>>> getPersonExpenses(
+	        @PathVariable Long id) {
+	    Person person = expenseService.getPersonById(id);
+	    List<Expense> allExpenses = expenseService.getAllExpenses();
+
+	    List<Map<String, Object>> result = allExpenses.stream()
+	        .filter(e -> !e.isSettled())
+	        .filter(e -> (e.getPaidBy() != null && e.getPaidBy().getId().equals(id)) ||
+	                     (e.getOwedBy() != null && e.getOwedBy().getId().equals(id)))
+	        .map(e -> {
+	            Map<String, Object> item = new java.util.HashMap<>();
+	            item.put("description", e.getDescription());
+	            item.put("amount", e.getAmount());
+	            item.put("category", e.getCategory());
+	            item.put("owedBy", e.getOwedBy() != null ? e.getOwedBy().getName() :
+	                               e.getOwedByName());
+	            item.put("paidBy", e.getPaidBy() != null ? e.getPaidBy().getName() :
+	                               e.getPaidByName());
+	            item.put("deadline", e.getDeadline());
+	            return item;
+	        })
+	        .toList();
+
+	    return ResponseEntity.ok(result);
 	}
 	
 
