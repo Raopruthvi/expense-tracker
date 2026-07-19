@@ -66,13 +66,23 @@ public class ExpenseService {
 
     public void deleteExpense(Long id) {
         Expense expense = getExpenseById(id);
+
+        // Refund regardless of settled status
+        // Only refund allowance if expense was not settled
+        // (settled expenses already had their allowance refunded at settle time)
         if (!expense.isSettled()) {
             refundAllowance(expense);
-            refundAccountBalance(expense);
         }
+
+        // Always refund account/cash balance on delete
+        // If settled: the money was already added back at settle time
+        // so don't double-refund account balance
+        if (!expense.isSettled()) {
+            refundBalance(expense);
+        }
+
         expenseRepository.deleteById(id);
     }
-
     // ─── BUSINESS LOGIC ───────────────────────────────────────
 
     public List<Expense> getUnsettledExpenses() {
@@ -296,14 +306,34 @@ public class ExpenseService {
         }
     }
 
-    private void refundAccountBalance(Expense expense) {
+    private void refundBalance(Expense expense) {
         try {
             FinancialProfile profile = financialProfileRepository.findAll()
                     .stream().findFirst().orElse(null);
             if (profile == null) return;
-            profile.setAccountBalance(
-                profile.getAccountBalance().add(expense.getAmount()));
-            financialProfileRepository.save(profile);
+
+            // Only refund if Mani was the one who paid
+            String paidByName = expense.getPaidByName() != null ?
+                    expense.getPaidByName() :
+                    (expense.getPaidBy() != null ? expense.getPaidBy().getName() : "");
+            String owedByName = expense.getOwedByName() != null ?
+                    expense.getOwedByName() :
+                    (expense.getOwedBy() != null ? expense.getOwedBy().getName() : "");
+
+            boolean maniPaid = paidByName.isEmpty() ||
+                               paidByName.equalsIgnoreCase("Mani");
+            boolean maniOwes = owedByName.equalsIgnoreCase("Mani");
+
+            if (maniPaid && !maniOwes) {
+                if (expense.isCash()) {
+                    profile.setCashBalance(
+                        profile.getCashBalance().add(expense.getAmount()));
+                } else {
+                    profile.setAccountBalance(
+                        profile.getAccountBalance().add(expense.getAmount()));
+                }
+                financialProfileRepository.save(profile);
+            }
         } catch (Exception e) {
             // Skip
         }
