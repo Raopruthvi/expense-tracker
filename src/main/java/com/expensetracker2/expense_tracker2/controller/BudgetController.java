@@ -1,12 +1,11 @@
-
 package com.expensetracker2.expense_tracker2.controller;
-import java.math.BigDecimal;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.expensetracker2.expense_tracker2.model.Expense;
@@ -22,126 +21,115 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/budget")
 public class BudgetController {
-	
-	private final BudgetService budgetService;
-	
-	public BudgetController(BudgetService budgetService) {
-		this.budgetService=budgetService;
-	}
-	
-	//-----Profile Endpoint-----------
-	
-@PostMapping("/profile/setup")
-public ResponseEntity<FinancialProfile> setupProfile(@RequestBody Map<String, BigDecimal> request){
-	BigDecimal accountBalance=request.get("accountBalance");
-	BigDecimal cashBalance=request.get("cashBalance");
-	BigDecimal salaryAmount=request.get("salaryAmount");
-	BigDecimal initialSavings = request.get("initialSavings");
-	
-	FinancialProfile profile=budgetService.setupProfile(
-			accountBalance, cashBalance, salaryAmount, initialSavings);
-	
-	return ResponseEntity.status(HttpStatus.CREATED).body(profile);
-}
 
-@GetMapping("/profile")
-public ResponseEntity<FinancialProfile> getProfile(){
-	return ResponseEntity.ok(budgetService.getProfile());
-}
+    private final BudgetService budgetService;
 
-@PutMapping("/profile/update")
-public ResponseEntity<FinancialProfile> updateProfile(
-        @RequestBody Map<String, BigDecimal> request) {
-    FinancialProfile profile = budgetService.getProfile();
-
-    if (request.containsKey("accountBalance"))
-        profile.setAccountBalance(request.get("accountBalance"));
-    if (request.containsKey("cashBalance"))
-        profile.setCashBalance(request.get("cashBalance"));
-    if (request.containsKey("savingsAmount"))
-        profile.setSavingsAmount(request.get("savingsAmount"));
-    if (request.containsKey("salaryAmount")) {
-        profile.setSalaryAmount(request.get("salaryAmount"));
-        profile.setRemainingSalary(request.get("salaryAmount"));
+    public BudgetController(BudgetService budgetService) {
+        this.budgetService = budgetService;
     }
 
-    return ResponseEntity.ok(budgetService.saveProfile(profile));
+    // ─── PROFILE ──────────────────────────────────────────────
 
-	
-}
+    @PostMapping("/profile/setup")
+    public ResponseEntity<FinancialProfile> setupProfile(
+            @RequestBody Map<String, BigDecimal> request) {
+        FinancialProfile profile = budgetService.setupProfile(
+            request.get("accountBalance"),
+            request.get("cashBalance"),
+            request.get("salaryAmount"),
+            request.get("initialSavings")
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(profile);
+    }
 
-//-------Monthly Budget Endpoints--------
+    @GetMapping("/profile")
+    public ResponseEntity<FinancialProfile> getProfile() {
+        return ResponseEntity.ok(budgetService.getProfile());
+    }
 
-@PostMapping("/monthly")
+    @PutMapping("/profile/update")
+    public ResponseEntity<FinancialProfile> updateProfile(
+            @RequestBody Map<String, BigDecimal> request) {
+        return ResponseEntity.ok(budgetService.updateProfile(
+            request.get("accountBalance"),
+            request.get("cashBalance"),
+            request.get("salaryAmount"),
+            request.get("savingsAmount")
+        ));
+    }
 
-public ResponseEntity<MonthlyBudget> createMonthlyBudget(
-		@RequestBody Map<String, BigDecimal> request){
-	BigDecimal totalAllowance=request.get("totalAllowance");
-	BigDecimal vehicleAllowance=request.get("vehicleAllowance");
-	
-	MonthlyBudget budget= budgetService.createMonthlyBudget(totalAllowance, vehicleAllowance);
-	
-	return ResponseEntity.status(HttpStatus.CREATED).body(budget);
-}
+    @DeleteMapping("/profile/reset")
+    public ResponseEntity<Void> resetProfile() {
+        budgetService.resetProfile();
+        return ResponseEntity.noContent().build();
+    }
 
-@GetMapping("/monthly/current")
-public ResponseEntity<MonthlyBudget> getCurrentBudget(){
-	return ResponseEntity.ok(budgetService.getCurrentBudget());
-}
+    // ─── MONTHLY BUDGET ───────────────────────────────────────
 
-@PutMapping("/monthly/update")
-public ResponseEntity<MonthlyBudget> updateBudget(
-        @RequestBody Map<String, BigDecimal> request) {
-    BigDecimal totalAllowance = request.get("totalAllowance");
-    BigDecimal vehicleAllowance = request.get("vehicleAllowance");
-    return ResponseEntity.ok(budgetService.updateBudget(totalAllowance, vehicleAllowance));
-}
+    @PostMapping("/monthly")
+    public ResponseEntity<MonthlyBudget> createMonthlyBudget(
+            @RequestBody Map<String, BigDecimal> request) {
+        MonthlyBudget budget = budgetService.createMonthlyBudget(
+            request.get("totalAllowance"),
+            request.get("vehicleAllowance")
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(budget);
+    }
 
-//--------Record expense with budget deduction-------
-@PostMapping("/expense")
-public ResponseEntity<Map<String, Object>> recordExpense(@Valid @RequestBody Expense expense){
-	ExpenseResult result=budgetService.recordExpense(expense);
-	
-	Map<String, Object> response=new HashMap<>();
-	response.put("expense", result.expense);
-	response.put("remainingSalary", result.remainingSalary);
-	
-	if(result.warning!=null) {
-		response.put("warning", result.warning);
-	}
-	return ResponseEntity.status(HttpStatus.CREATED).body(response);
-}
+    @GetMapping("/monthly/current")
+    public ResponseEntity<MonthlyBudget> getCurrentBudget() {
+        return ResponseEntity.ok(budgetService.getCurrentBudget());
+    }
 
-//-------End of month------
+    @PutMapping("/monthly/update")
+    public ResponseEntity<MonthlyBudget> updateBudget(
+            @RequestBody Map<String, BigDecimal> request) {
+        return ResponseEntity.ok(budgetService.updateBudget(
+            request.get("totalAllowance"),
+            request.get("vehicleAllowance")
+        ));
+    }
 
-@PostMapping("/month-end")
-public ResponseEntity<EndOfMonthResult> closeMonth(){
-	return ResponseEntity.ok(budgetService.closeMonth());
-}
+    @DeleteMapping("/monthly/reset")
+    public ResponseEntity<Void> resetBudget() {
+        budgetService.resetBudget();
+        return ResponseEntity.noContent().build();
+    }
 
-//-----------Summary---------
+    // ─── EXPENSE ──────────────────────────────────────────────
 
-@GetMapping("/summary")
-public ResponseEntity<FinancialSummary> getSummary(){
-	return ResponseEntity.ok(budgetService.getSummary());
-}
+    @PostMapping("/expense")
+    public ResponseEntity<Map<String, Object>> recordExpense(
+            @Valid @RequestBody Expense expense) {
+        ExpenseResult result = budgetService.recordExpense(expense);
+        Map<String, Object> response = new HashMap<>();
+        response.put("expense", result.expense);
+        response.put("remainingSalary", result.remainingSalary);
+        if (result.warning != null) {
+            response.put("warning", result.warning);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-@DeleteMapping("/reset")
-public ResponseEntity<Void> resetAll() {
-    budgetService.resetAll();
-    return ResponseEntity.noContent().build();
-}
+    // ─── MONTH END ────────────────────────────────────────────
 
-@DeleteMapping("/monthly/reset")
-public ResponseEntity<Void> resetBudget() {
-    budgetService.resetBudget();
-    return ResponseEntity.noContent().build();
-}
+    @PostMapping("/month-end")
+    public ResponseEntity<EndOfMonthResult> closeMonth() {
+        return ResponseEntity.ok(budgetService.closeMonth());
+    }
 
-@DeleteMapping("/profile/reset")
-public ResponseEntity<Void> resetProfile() {
-    budgetService.resetProfile();
-    return ResponseEntity.noContent().build();
-}
+    // ─── SUMMARY ──────────────────────────────────────────────
 
+    @GetMapping("/summary")
+    public ResponseEntity<FinancialSummary> getSummary() {
+        return ResponseEntity.ok(budgetService.getSummary());
+    }
+
+    // ─── RESET ALL ────────────────────────────────────────────
+
+    @DeleteMapping("/reset")
+    public ResponseEntity<Void> resetAll() {
+        budgetService.resetAll();
+        return ResponseEntity.noContent().build();
+    }
 }
