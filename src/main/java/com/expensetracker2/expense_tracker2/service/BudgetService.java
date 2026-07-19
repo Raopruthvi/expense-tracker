@@ -16,6 +16,8 @@ public class BudgetService {
 	private final FinancialProfileRepository profileRepository;
 	private final MonthlyBudgetRepository budgetRepository;
 	private final ExpenseRepository expenseRepository;
+	
+	
 
 	
 	
@@ -109,51 +111,81 @@ public class BudgetService {
 	
 	//------Record an expense with budget deduction--------
 	
+	private static final String OWNER_NAME = "Mani";
+
 	public ExpenseResult recordExpense(Expense expense) {
-		FinancialProfile profile=getProfile();
-		MonthlyBudget budget=getCurrentBudget();
-		String warning=null;
-		
-		Category category=expense.getCategory();
-		
-		if(category==Category.VEHICLE) {
-			BigDecimal remaining=budget.getRemainingVehicleAllowance();
-			if(remaining.compareTo(expense.getAmount())>=0) {
-				budget.setRemainingVehicleAllowance(
-						remaining.subtract(expense.getAmount()));
-			} else {
-				BigDecimal overflow=expense.getAmount().subtract(remaining);
-				budget.setRemainingVehicleAllowance(BigDecimal.ZERO);
-				profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
-				warning="Vehicle allowance exhausted. ₹" + overflow +" deducted from salary. Remaining salary: ₹"+profile.getRemainingSalary();
-			}
-		} else if(category==Category.FOOD ||
-				category==Category.SPORTS ||
-				category==Category.MISCELLANEOUS ||
-				category==Category.ONLINE_SHOPPING ||
-				category==Category.SUBSCRIPTIONS ||
-				category==Category.TRIP) {
-			BigDecimal remaining=budget.getRemainingAllowance();
-			if(remaining.compareTo(expense.getAmount())>=0) {
-				budget.setRemainingAllowance(remaining.subtract(expense.getAmount()));
-			} else {
-				BigDecimal overflow=expense.getAmount().subtract(remaining);
-				budget.setRemainingAllowance(BigDecimal.ZERO);
-				profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
-				warning="Monthly allowance exhausted. ₹"+overflow+" deducted from salary. Remaining salary:  ₹"+profile.getRemainingSalary();
-			}
-		}
-		
-		//Always deduct from Account Balance regardless of category
-		profile.setAccountBalance(
-				profile.getAccountBalance().subtract(expense.getAmount()));
-		profileRepository.save(profile);
-		budgetRepository.save(budget);
-		Expense saved=expenseRepository.save(expense);
-		
-		return new ExpenseResult(saved,warning,profile.getRemainingSalary());
-			
-		
+	    FinancialProfile profile = getProfile();
+	    MonthlyBudget budget = getCurrentBudget();
+	    String warning = null;
+
+	    Category category = expense.getCategory();
+	    BigDecimal amount = expense.getAmount();
+	    boolean isCashExpense = expense.isCash();
+
+	    boolean maniIsPaying = expense.getPaidByName() == null ||
+	                           expense.getPaidByName().equalsIgnoreCase(OWNER_NAME) ||
+	                           expense.getPaidBy() == null;
+
+	    boolean maniOwes = expense.getOwedByName() != null &&
+	                       expense.getOwedByName().equalsIgnoreCase(OWNER_NAME);
+
+	    // Only deduct when Mani is paying (not when someone else paid and Mani owes)
+	    if (maniIsPaying && !maniOwes) {
+	        // Deduct from account or cash balance
+	        if (isCashExpense) {
+	            profile.setCashBalance(profile.getCashBalance().subtract(amount));
+	        } else {
+	            profile.setAccountBalance(profile.getAccountBalance().subtract(amount));
+	        }
+
+	        // Deduct from allowance pool
+	        warning = deductFromAllowance(profile, budget, category, amount);
+	    }
+
+	    profileRepository.save(profile);
+	    budgetRepository.save(budget);
+	    Expense saved = expenseRepository.save(expense);
+
+	    return new ExpenseResult(saved, warning, profile.getRemainingSalary());
+	}
+
+	private String deductFromAllowance(FinancialProfile profile, MonthlyBudget budget,
+	                                    Category category, BigDecimal amount) {
+	    String warning = null;
+	    if (category == Category.VEHICLE) {
+	        BigDecimal remaining = budget.getRemainingVehicleAllowance();
+	        if (remaining.compareTo(amount) >= 0) {
+	            budget.setRemainingVehicleAllowance(remaining.subtract(amount));
+	        } else {
+	            BigDecimal overflow = amount.subtract(remaining);
+	            budget.setRemainingVehicleAllowance(BigDecimal.ZERO);
+	            profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+	            warning = "Vehicle allowance exhausted. ₹" + overflow +
+	                      " deducted from salary. Remaining salary: ₹" +
+	                      profile.getRemainingSalary();
+	        }
+	    } else if (category == Category.FOOD ||
+	               category == Category.SPORTS ||
+	               category == Category.MISCELLANEOUS ||
+	               category == Category.ONLINE_SHOPPING ||
+	               category == Category.SUBSCRIPTIONS ||
+	               category == Category.TRIP) {
+	        BigDecimal remaining = budget.getRemainingAllowance();
+	        if (remaining.compareTo(amount) >= 0) {
+	            budget.setRemainingAllowance(remaining.subtract(amount));
+	        } else {
+	            BigDecimal overflow = amount.subtract(remaining);
+	            budget.setRemainingAllowance(BigDecimal.ZERO);
+	            profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+	            warning = "Monthly allowance exhausted. ₹" + overflow +
+	                      " deducted from salary. Remaining salary: ₹" +
+	                      profile.getRemainingSalary();
+	        }
+	    } else {
+	        // GENERAL — deduct from salary
+	        profile.setRemainingSalary(profile.getRemainingSalary().subtract(amount));
+	    }
+	    return warning;
 	}
 	
 	//---------End of month-------------

@@ -91,12 +91,131 @@ public class ExpenseService {
                 .toList();
     }
 
+    private static final String OWNER_NAME = "Mani";
+
     public Expense settleExpense(Long id) {
         Expense expense = getExpenseById(id);
         expense.setSettled(true);
-        refundAllowance(expense);
-        refundAccountBalance(expense);
+
+        try {
+            FinancialProfile profile = financialProfileRepository.findAll()
+                    .stream().findFirst().orElse(null);
+            int month = LocalDate.now().getMonthValue();
+            int year = LocalDate.now().getYear();
+            MonthlyBudget budget = monthlyBudgetRepository
+                    .findByMonthAndYearAndClosedFalse(month, year)
+                    .orElse(null);
+
+            if (profile == null || budget == null) {
+                return expenseRepository.save(expense);
+            }
+
+            BigDecimal amount = expense.getAmount();
+            Category category = expense.getCategory();
+            boolean isCash = expense.isCash();
+
+            String paidByName = expense.getPaidByName() != null ?
+                    expense.getPaidByName() :
+                    (expense.getPaidBy() != null ? expense.getPaidBy().getName() : "");
+            String owedByName = expense.getOwedByName() != null ?
+                    expense.getOwedByName() :
+                    (expense.getOwedBy() != null ? expense.getOwedBy().getName() : "");
+
+            boolean maniPaid = paidByName.equalsIgnoreCase(OWNER_NAME) || paidByName.isEmpty();
+            boolean maniOwes = owedByName.equalsIgnoreCase(OWNER_NAME);
+
+            if (maniPaid && !maniOwes) {
+                // Someone paid Mani back → add to balance and allowance
+                if (isCash) {
+                    profile.setCashBalance(profile.getCashBalance().add(amount));
+                } else {
+                    profile.setAccountBalance(profile.getAccountBalance().add(amount));
+                }
+                refundAllowance(expense, profile, budget);
+            } else if (maniOwes) {
+                // Mani pays someone back → deduct from balance and allowance
+                if (isCash) {
+                    profile.setCashBalance(profile.getCashBalance().subtract(amount));
+                } else {
+                    profile.setAccountBalance(profile.getAccountBalance().subtract(amount));
+                }
+                deductAllowance(expense, profile, budget);
+            }
+
+            financialProfileRepository.save(profile);
+            monthlyBudgetRepository.save(budget);
+
+        } catch (Exception e) {
+            // Skip financial updates on error
+        }
+
         return expenseRepository.save(expense);
+    }
+
+    private void deductAllowance(Expense expense, FinancialProfile profile,
+                                  MonthlyBudget budget) {
+        BigDecimal amount = expense.getAmount();
+        Category category = expense.getCategory();
+
+        if (category == Category.VEHICLE) {
+            BigDecimal remaining = budget.getRemainingVehicleAllowance();
+            if (remaining.compareTo(amount) >= 0) {
+                budget.setRemainingVehicleAllowance(remaining.subtract(amount));
+            } else {
+                BigDecimal overflow = amount.subtract(remaining);
+                budget.setRemainingVehicleAllowance(BigDecimal.ZERO);
+                profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+            }
+        } else if (category == Category.FOOD ||
+                   category == Category.SPORTS ||
+                   category == Category.MISCELLANEOUS ||
+                   category == Category.ONLINE_SHOPPING ||
+                   category == Category.SUBSCRIPTIONS ||
+                   category == Category.TRIP) {
+            BigDecimal remaining = budget.getRemainingAllowance();
+            if (remaining.compareTo(amount) >= 0) {
+                budget.setRemainingAllowance(remaining.subtract(amount));
+            } else {
+                BigDecimal overflow = amount.subtract(remaining);
+                budget.setRemainingAllowance(BigDecimal.ZERO);
+                profile.setRemainingSalary(profile.getRemainingSalary().subtract(overflow));
+            }
+        } else {
+            profile.setRemainingSalary(profile.getRemainingSalary().subtract(amount));
+        }
+    }
+
+    private void refundAllowance(Expense expense, FinancialProfile profile,
+                                  MonthlyBudget budget) {
+        BigDecimal amount = expense.getAmount();
+        Category category = expense.getCategory();
+
+        if (category == Category.VEHICLE) {
+            BigDecimal newVehicle = budget.getRemainingVehicleAllowance().add(amount);
+            if (newVehicle.compareTo(budget.getVehicleAllowance()) > 0) {
+                BigDecimal overflow = newVehicle.subtract(budget.getVehicleAllowance());
+                budget.setRemainingVehicleAllowance(budget.getVehicleAllowance());
+                profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
+            } else {
+                budget.setRemainingVehicleAllowance(newVehicle);
+            }
+        } else if (category == Category.FOOD ||
+                   category == Category.SPORTS ||
+                   category == Category.MISCELLANEOUS ||
+                   category == Category.ONLINE_SHOPPING ||
+                   category == Category.SUBSCRIPTIONS ||
+                   category == Category.TRIP) {
+            BigDecimal newAllowance = budget.getRemainingAllowance().add(amount);
+            if (newAllowance.compareTo(budget.getTotalAllowance()) > 0) {
+                BigDecimal overflow = newAllowance.subtract(budget.getTotalAllowance());
+                budget.setRemainingAllowance(budget.getTotalAllowance());
+                profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
+            } else {
+                budget.setRemainingAllowance(newAllowance);
+            }
+        } else {
+            profile.setRemainingSalary(profile.getRemainingSalary().add(amount));
+        }
     }
 
     public BigDecimal getTotalOwedBy(Long personId) {

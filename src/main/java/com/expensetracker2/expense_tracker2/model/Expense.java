@@ -40,6 +40,7 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Category cannot be null")
     private Category category;
+    private boolean cash;
 
     public Expense() {}
 
@@ -74,4 +75,7 @@ public class Expense {
 
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+    
+    public boolean isCash() { return cash; }
+    public void setCash(boolean cash) { this.cash = cash; }
 }
