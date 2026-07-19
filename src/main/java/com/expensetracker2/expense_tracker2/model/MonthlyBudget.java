@@ -78,6 +78,10 @@ public class MonthlyBudget {
 	public BigDecimal getVehicleAllowance() {
 		return vehicleAllowance;
 	}
+	
+	public void setVehicleAllowance(BigDecimal vehicleAllowance) {
+	    this.vehicleAllowance = vehicleAllowance;
+	}
 
 	public BigDecimal getRemainingVehicleAllowance() {
 		return remainingVehicleAllowance;
