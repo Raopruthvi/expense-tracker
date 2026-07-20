@@ -199,10 +199,7 @@ public class BudgetService {
 
             profileRepository.save(profile);
             budgetRepository.save(budget);
-        }  catch (Exception e) {
-            System.err.println("ERROR in deleteExpense: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception ignored) {}
         expenseRepository.deleteById(id);
     }
 
@@ -311,27 +308,37 @@ public class BudgetService {
     }
 
     private void refundAllowance(FinancialProfile profile, MonthlyBudget budget,
-                                  Category category, BigDecimal amount) {
-        if (category == Category.VEHICLE) {
-            BigDecimal newV = budget.getRemainingVehicleAllowance().add(amount);
-            if (newV.compareTo(budget.getVehicleAllowance()) > 0) {
-                BigDecimal overflow = newV.subtract(budget.getVehicleAllowance());
-                budget.setRemainingVehicleAllowance(budget.getVehicleAllowance());
-                profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
-            } else {
-                budget.setRemainingVehicleAllowance(newV);
-            }
-        } else {
-            BigDecimal newA = budget.getRemainingAllowance().add(amount);
-            if (newA.compareTo(budget.getTotalAllowance()) > 0) {
-                BigDecimal overflow = newA.subtract(budget.getTotalAllowance());
-                budget.setRemainingAllowance(budget.getTotalAllowance());
-                profile.setRemainingSalary(profile.getRemainingSalary().add(overflow));
-            } else {
-                budget.setRemainingAllowance(newA);
-            }
-        }
-    }
+            Category category, BigDecimal amount) {
+if (category == Category.VEHICLE) {
+BigDecimal current = budget.getRemainingVehicleAllowance();
+BigDecimal max = budget.getVehicleAllowance();
+BigDecimal space = max.subtract(current); // how much room in allowance
+
+if (amount.compareTo(space) <= 0) {
+// Entire refund fits in allowance
+budget.setRemainingVehicleAllowance(current.add(amount));
+} else {
+// Fill allowance to max, rest goes to salary
+budget.setRemainingVehicleAllowance(max);
+BigDecimal toSalary = amount.subtract(space);
+profile.setRemainingSalary(profile.getRemainingSalary().add(toSalary));
+}
+} else {
+BigDecimal current = budget.getRemainingAllowance();
+BigDecimal max = budget.getTotalAllowance();
+BigDecimal space = max.subtract(current); // how much room in allowance
+
+if (amount.compareTo(space) <= 0) {
+// Entire refund fits in allowance
+budget.setRemainingAllowance(current.add(amount));
+} else {
+// Fill allowance to max, rest goes to salary
+budget.setRemainingAllowance(max);
+BigDecimal toSalary = amount.subtract(space);
+profile.setRemainingSalary(profile.getRemainingSalary().add(toSalary));
+}
+}
+}
 
     private String trim(String s) {
         return s != null ? s.trim() : "";
