@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expenses</title>
+    <title>Expenses · SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f8; }
+        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+        .input { width:100%; border:1.5px solid #e5e7eb; border-radius:10px; padding:12px; font-size:14px; outline:none; transition:border 0.2s; }
+        .input:focus { border-color:#667eea; }
+        .btn-primary { width:100%; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; }
+        .chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:600; }
+        .tag { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; background:#ede9fe; color:#7c3aed; font-weight:500; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+<body>
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:48px 20px 20px;">
+        <h1 style="font-size:22px;font-weight:700;">Expenses</h1>
     </div>
-    <div class="bg-white shadow-sm flex overflow-x-auto">
-        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
-        <a href="expenses.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Expenses</a>
-        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
-        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
-        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
-    </div>
-    <div class="p-4 space-y-4">
-        <div class="bg-white rounded-xl shadow p-4">
-            <h2 class="font-bold text-gray-700 mb-3">Add Expense</h2>
-            <div class="space-y-2">
-                <input id="description" type="text" placeholder="Description *"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="amount" type="number" placeholder="Amount ₹ *"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <select id="category" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+
+    <div style="padding:16px; padding-bottom:100px; max-width:480px; margin:0 auto;">
+
+        <!-- Add Expense Form -->
+        <div class="card" style="margin-bottom:16px;">
+            <h2 style="font-size:16px;font-weight:700;color:#1f2937;margin-bottom:16px;">Add Expense</h2>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <input id="description" class="input" type="text" placeholder="What did you spend on? *">
+                <input id="amount" class="input" type="number" step="0.01" placeholder="Amount ₹ *">
+
+                <select id="category" class="input" style="appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:40px;">
                     <option value="">Select Category *</option>
                     <option value="FOOD">🍽 Food</option>
                     <option value="SPORTS">⚽ Sports</option>
@@ -36,46 +41,62 @@
                     <option value="MISCELLANEOUS">📦 Miscellaneous</option>
                     <option value="GENERAL">💼 General</option>
                 </select>
+
                 <div>
-                    <p class="text-xs text-gray-400 mb-1 ml-1">Date of Spending *</p>
-                    <input id="spendingDate" type="date"
-                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Date of Spending *</label>
+                    <input id="spendingDate" class="input" type="date">
                 </div>
+
                 <div>
-                    <p class="text-xs text-gray-400 mb-1 ml-1">Settlement Deadline (optional)</p>
-                    <input id="deadline" type="date"
-                        class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
+                    <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px;">Settlement Deadline (optional)</label>
+                    <input id="deadline" class="input" type="date">
                 </div>
-                <input id="paidByName" type="text" placeholder="Paid By - Name (optional)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="owedByName" type="text" placeholder="Owed By - Name (optional)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <input id="isCash" type="checkbox" class="w-4 h-4">
-                    <label for="isCash" class="text-sm text-gray-700">💵 Paid by Cash</label>
-                </div>
-                <div id="warningBox" class="hidden bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-lg p-3 text-sm"></div>
-                <button onclick="addExpense()"
-                    class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Add Expense
-                </button>
+
+                <input id="paidByName" class="input" type="text" placeholder="Paid by (optional, default: Mani)">
+                <input id="owedByName" class="input" type="text" placeholder="Owed by (optional)">
+
+                <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#f9fafb;border-radius:10px;cursor:pointer;">
+                    <input id="isCash" type="checkbox" style="width:18px;height:18px;accent-color:#667eea;">
+                    <span style="font-size:14px;color:#374151;font-weight:500;">💵 Paid by Cash</span>
+                </label>
+
+                <div id="warningBox" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;font-size:13px;color:#92400e;"></div>
+
+                <button class="btn-primary" onclick="addExpense()">Add Expense</button>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex gap-2">
-                <button onclick="loadExpenses('all')" id="btn-all"
-                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-blue-600 text-white">All</button>
-                <button onclick="loadExpenses('unsettled')" id="btn-unsettled"
-                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Unsettled</button>
-                <button onclick="loadExpenses('overdue')" id="btn-overdue"
-                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Overdue</button>
+
+        <!-- Filters -->
+        <div class="card" style="margin-bottom:16px;">
+            <div style="display:flex;gap:8px;">
+                <button id="btn-all" onclick="loadExpenses('all')"
+                    style="flex:1;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-size:13px;font-weight:600;cursor:pointer;">All</button>
+                <button id="btn-unsettled" onclick="loadExpenses('unsettled')"
+                    style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#6b7280;font-size:13px;font-weight:500;cursor:pointer;">Unsettled</button>
+                <button id="btn-overdue" onclick="loadExpenses('overdue')"
+                    style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#6b7280;font-size:13px;font-weight:500;cursor:pointer;">Overdue</button>
             </div>
         </div>
-        <div id="expenseList" class="space-y-3"></div>
+
+        <div id="expenseList"></div>
     </div>
+
+    <!-- Bottom Nav -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+        <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">🏠</span>Home</a>
+        <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#667eea;text-decoration:none;font-size:11px;font-weight:600;"><span style="font-size:22px">💸</span>Expenses</a>
+        <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">👥</span>People</a>
+        <a href="budget.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📊</span>Budget</a>
+        <a href="month-end.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📅</span>Month End</a>
+    </div>
+
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
         const OWNER = 'mani';
+
+        function fmt(v) {
+            return parseFloat(v).toLocaleString('en-IN', {minimumFractionDigits:2,maximumFractionDigits:2});
+        }
 
         async function addExpense() {
             const description = document.getElementById('description').value.trim();
@@ -88,120 +109,109 @@
             const isCash = document.getElementById('isCash').checked;
 
             if (!description || !amount || !category || !spendingDate) {
-                alert('Please fill in description, amount, category and date of spending');
+                alert('Please fill description, amount, category and spending date.');
                 return;
             }
 
-            const expenseData = {
-                description,
-                amount: parseFloat(amount),
-                category,
-                spendingDate,
-                settled: false,
-                cash: isCash
-            };
-
-            if (deadline) expenseData.deadline = deadline;
-            if (paidByName) expenseData.paidByName = paidByName;
-            if (owedByName) expenseData.owedByName = owedByName;
+            const data = { description, amount: parseFloat(amount), category, spendingDate, settled: false, cash: isCash };
+            if (deadline) data.deadline = deadline;
+            if (paidByName) data.paidByName = paidByName;
+            if (owedByName) data.owedByName = owedByName;
 
             try {
                 const res = await fetch(`${API}/api/budget/expense`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(expenseData)
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify(data)
                 });
-                if (!res.ok) {
-                    const err = await res.json();
-                    alert('Error: ' + (err.message || 'Failed to add expense'));
-                    return;
-                }
-                const data = await res.json();
-                if (data.warning) {
-                    const box = document.getElementById('warningBox');
-                    box.textContent = '⚠️ ' + data.warning;
-                    box.classList.remove('hidden');
+                const result = await res.json();
+                if (!res.ok) { alert(result.message || 'Error adding expense'); return; }
+
+                if (result.warning) {
+                    const wb = document.getElementById('warningBox');
+                    wb.textContent = '⚠️ ' + result.warning;
+                    wb.style.display = 'block';
                 } else {
-                    document.getElementById('warningBox').classList.add('hidden');
+                    document.getElementById('warningBox').style.display = 'none';
                 }
-                document.getElementById('description').value = '';
-                document.getElementById('amount').value = '';
+
+                ['description','amount','deadline','paidByName','owedByName'].forEach(id => document.getElementById(id).value = '');
                 document.getElementById('category').value = '';
                 document.getElementById('spendingDate').value = '';
-                document.getElementById('deadline').value = '';
-                document.getElementById('paidByName').value = '';
-                document.getElementById('owedByName').value = '';
                 document.getElementById('isCash').checked = false;
                 loadExpenses('all');
-            } catch (err) {
-                alert('Error: ' + err.message);
-            }
+            } catch(e) { alert('Network error: ' + e.message); }
         }
 
         async function loadExpenses(filter = 'all') {
-            ['all', 'unsettled', 'overdue'].forEach(f => {
-                document.getElementById(`btn-${f}`).className =
-                    'flex-1 py-2 px-3 rounded-lg text-sm font-medium ' +
-                    (f === filter ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600');
+            ['all','unsettled','overdue'].forEach(f => {
+                const btn = document.getElementById('btn-' + f);
+                if (f === filter) {
+                    btn.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
+                    btn.style.color = 'white';
+                    btn.style.border = 'none';
+                    btn.style.fontWeight = '600';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.color = '#6b7280';
+                    btn.style.border = '1.5px solid #e5e7eb';
+                    btn.style.fontWeight = '500';
+                }
             });
 
             const res = await fetch(`${API}/api/expenses`);
             let expenses = await res.json();
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
 
             if (filter === 'unsettled') {
-                expenses = expenses.filter(e =>
-                    !e.settled && e.deadline && (e.owedBy || e.owedByName));
+                expenses = expenses.filter(e => !e.settled && e.deadline && (e.owedBy || e.owedByName));
             } else if (filter === 'overdue') {
-                expenses = expenses.filter(e => {
-                    if (!e.deadline || e.settled) return false;
-                    return new Date(e.deadline) < today;
-                });
+                expenses = expenses.filter(e => !e.settled && e.deadline && new Date(e.deadline) < today);
             }
 
             const list = document.getElementById('expenseList');
-            if (expenses.length === 0) {
-                list.innerHTML = '<div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">No expenses found</div>';
+            if (!expenses.length) {
+                list.innerHTML = '<div class="card" style="text-align:center;color:#9ca3af;padding:32px;">No expenses found</div>';
                 return;
             }
+
+            const catColors = {
+                FOOD:'#fef3c7|#d97706', SPORTS:'#dcfce7|#16a34a', VEHICLE:'#ffedd5|#ea580c',
+                TRIP:'#dbeafe|#2563eb', ONLINE_SHOPPING:'#ede9fe|#7c3aed',
+                SUBSCRIPTIONS:'#fce7f3|#db2777', MISCELLANEOUS:'#f3f4f6|#6b7280',
+                GENERAL:'#e0f2fe|#0284c7'
+            };
 
             list.innerHTML = expenses.map(e => {
                 const owedName = e.owedBy ? e.owedBy.name : (e.owedByName || '');
                 const paidName = e.paidBy ? e.paidBy.name : (e.paidByName || '');
                 const hasSettlement = e.deadline && (e.owedBy || e.owedByName);
                 const maniOwes = owedName.toLowerCase() === OWNER;
-                const settleLabel = maniOwes ? '💸 Pay Back' : '✅ Collect';
-                const settleBtnColor = maniOwes ? 'bg-orange-500' : 'bg-green-500';
+                const [catBg, catColor] = (catColors[e.category] || '#f3f4f6|#6b7280').split('|');
 
-                return `
-                <div class="bg-white rounded-xl shadow p-4">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-800">${e.description}</p>
-                            <p class="text-2xl font-bold text-blue-600 mt-1">₹${e.amount}</p>
-                            <div class="flex gap-2 mt-2 flex-wrap">
-                                <span class="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full">${e.category}</span>
-                                ${e.cash ? `<span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded-full">💵 Cash</span>` : ''}
-                                ${e.settled ?
-                                    `<span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full">✅ Settled</span>` :
-                                    hasSettlement ?
-                                    `<span class="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">⏳ Pending</span>` : ''
-                                }
+                return `<div class="card" style="margin-bottom:12px;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+                        <div style="flex:1;min-width:0;">
+                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                                <span style="font-size:14px;font-weight:700;color:#1f2937;">${e.description}</span>
+                                <span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:${catBg};color:${catColor};">${e.category.replace('_',' ')}</span>
+                                ${e.cash ? '<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef9c3;color:#a16207;">💵 CASH</span>' : ''}
                             </div>
-                            ${paidName ? `<p class="text-xs text-gray-500 mt-1">Paid by: ${paidName}</p>` : ''}
-                            ${owedName ? `<p class="text-xs text-gray-500">Owed by: ${owedName}</p>` : ''}
-                            ${e.spendingDate ? `<p class="text-xs text-gray-400 mt-1">Spent on: ${e.spendingDate}</p>` : ''}
-                            ${e.deadline ? `<p class="text-xs text-gray-400">Due: ${e.deadline}</p>` : ''}
+                            <p style="font-size:24px;font-weight:800;color:#667eea;margin:4px 0;">₹${fmt(e.amount)}</p>
+                            ${e.settled ? '<span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">✅ Settled</span>' :
+                              hasSettlement ? '<span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:#fee2e2;color:#dc2626;">⏳ Pending</span>' : ''}
+                            <div style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8;">
+                                ${paidName ? `<div>Paid by: <b>${paidName}</b></div>` : ''}
+                                ${owedName ? `<div>Owed by: <b>${owedName}</b></div>` : ''}
+                                ${e.spendingDate ? `<div>Spent: ${e.spendingDate}</div>` : ''}
+                                ${e.deadline ? `<div>Due: ${e.deadline}</div>` : ''}
+                            </div>
                         </div>
-                        <div class="flex flex-col gap-2 ml-3">
-                            ${!e.settled && hasSettlement ?
-                                `<button onclick="settle(${e.id})"
-                                    class="${settleBtnColor} text-white text-xs px-3 py-2 rounded-lg">
-                                    ${settleLabel}
-                                </button>` : ''}
-                            <button onclick="deleteExpense(${e.id})"
-                                class="bg-red-500 text-white text-xs px-3 py-2 rounded-lg">Delete</button>
+                        <div style="display:flex;flex-direction:column;gap:8px;min-width:72px;">
+                            ${!e.settled && hasSettlement ? `
+                            <button onclick="settle(${e.id})" style="padding:8px 12px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:${maniOwes ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#22c55e,#16a34a)'};color:white;">
+                                ${maniOwes ? '💸 Pay' : '✅ Collect'}
+                            </button>` : ''}
+                            <button onclick="del(${e.id})" style="padding:8px 12px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:#fee2e2;color:#dc2626;">Delete</button>
                         </div>
                     </div>
                 </div>`;
@@ -209,13 +219,14 @@
         }
 
         async function settle(id) {
-            await fetch(`${API}/api/expenses/${id}/settle`, { method: 'PUT' });
+            const res = await fetch(`${API}/api/budget/expense/${id}/settle`, {method:'PUT'});
+            if (!res.ok) { const e = await res.json(); alert(e.message || 'Error settling'); return; }
             loadExpenses('all');
         }
 
-        async function deleteExpense(id) {
-            if (!confirm('Delete this expense?')) return;
-            await fetch(`${API}/api/expenses/${id}`, { method: 'DELETE' });
+        async function del(id) {
+            if (!confirm('Delete this expense? All financial changes will be reversed.')) return;
+            await fetch(`${API}/api/budget/expense/${id}`, {method:'DELETE'});
             loadExpenses('all');
         }
 

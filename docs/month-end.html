@@ -3,146 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Month End</title>
+    <title>Month End · SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f8; }
+        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:16px; }
+        .row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f3f4f6; }
+        .row:last-child { border-bottom:none; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+<body>
+    <div style="background:linear-gradient(135deg,#8e2de2,#4a00e0);color:white;padding:48px 20px 20px;">
+        <h1 style="font-size:22px;font-weight:700;">Month End</h1>
+        <p style="font-size:13px;opacity:0.8;margin-top:4px;">Close month & move to savings</p>
     </div>
-    <div class="bg-white shadow-sm flex overflow-x-auto">
-        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
-        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
-        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
-        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
-        <a href="month-end.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Month End</a>
-    </div>
-    <div class="p-4 space-y-4">
-        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-            <p class="text-orange-800 font-medium text-sm">⚠️ Month End Process</p>
-            <p class="text-orange-700 text-sm mt-1">Closes the current month, moves remaining allowances and salary to savings, resets for next month. Cannot be undone.</p>
+
+    <div style="padding:16px;padding-bottom:100px;max-width:480px;margin:0 auto;">
+
+        <!-- Warning -->
+        <div style="background:#fffbeb;border:1px solid #fcd34d;border-radius:16px;padding:16px;margin-bottom:16px;">
+            <p style="font-size:14px;font-weight:700;color:#92400e;">⚠️ This cannot be undone</p>
+            <p style="font-size:13px;color:#78350f;margin-top:4px;">Remaining allowances and salary will be moved to savings. Budget will be closed for this month.</p>
         </div>
-        <div id="summary" class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-400 text-sm">Loading...</p>
+
+        <!-- Summary -->
+        <div class="card" id="summaryCard">
+            <p style="color:#9ca3af;font-size:14px;">Loading...</p>
         </div>
-        <button onclick="closeMonth()"
-            class="w-full bg-orange-600 text-white rounded-xl p-4 font-bold text-base">
-            Close This Month & Move to Savings
+
+        <!-- Close Button -->
+        <button onclick="closeMonth()" style="width:100%;background:linear-gradient(135deg,#8e2de2,#4a00e0);color:white;border:none;border-radius:16px;padding:16px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:16px;">
+            Close This Month & Save 💰
         </button>
-        <div id="result" class="hidden bg-white rounded-xl shadow p-4"></div>
+
+        <!-- Result -->
+        <div class="card" id="resultCard" style="display:none;"></div>
 
         <!-- Reset All -->
-        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
-            <p class="text-red-800 font-medium text-sm">🗑 Reset Entire App</p>
-            <p class="text-red-700 text-sm mt-1">Deletes ALL data — expenses, people, profile, budget, savings. Use this to give a fresh start.</p>
-            <button onclick="resetAll()"
-                class="w-full mt-3 bg-red-600 text-white rounded-lg p-3 font-bold text-sm">
+        <div style="background:#fff1f2;border:1px solid #fecaca;border-radius:16px;padding:16px;">
+            <p style="font-size:14px;font-weight:700;color:#991b1b;">🗑 Reset Entire App</p>
+            <p style="font-size:13px;color:#7f1d1d;margin-top:4px;margin-bottom:12px;">Deletes ALL data — expenses, people, profile and budget. Use to give a fresh start.</p>
+            <button onclick="resetAll()" style="width:100%;background:#dc2626;color:white;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;">
                 Reset Everything
             </button>
         </div>
+
     </div>
+
+    <!-- Bottom Nav -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+        <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">🏠</span>Home</a>
+        <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">💸</span>Expenses</a>
+        <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">👥</span>People</a>
+        <a href="budget.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📊</span>Budget</a>
+        <a href="month-end.html" style="display:flex;flex-direction:column;align-items:center;color:#8e2de2;text-decoration:none;font-size:11px;font-weight:600;"><span style="font-size:22px">📅</span>Month End</a>
+    </div>
+
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
 
+        function fmt(v) {
+            return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+        }
+
         async function loadSummary() {
+            const card = document.getElementById('summaryCard');
             try {
-                const [summaryRes, budgetRes] = await Promise.all([
+                const [sr, br] = await Promise.all([
                     fetch(`${API}/api/budget/summary`),
                     fetch(`${API}/api/budget/monthly/current`)
                 ]);
-                if (!summaryRes.ok || !budgetRes.ok) throw new Error();
-                const d = await summaryRes.json();
-                const b = await budgetRes.json();
+                if (!sr.ok || !br.ok) {
+                    card.innerHTML = '<p style="color:#9ca3af;font-size:14px;">No active profile or budget found.</p>';
+                    return;
+                }
+                const d = await sr.json();
+
                 const total = (
                     parseFloat(d.remainingAllowance) +
                     parseFloat(d.remainingVehicleAllowance) +
                     parseFloat(d.remainingSalary)
                 ).toFixed(2);
-                document.getElementById('summary').innerHTML = `
-                    <h2 class="font-bold text-gray-700 mb-3">This Month's Summary</h2>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Remaining General Allowance</span>
-                            <span class="font-medium text-green-600">₹${d.remainingAllowance}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Remaining Vehicle Allowance</span>
-                            <span class="font-medium text-green-600">₹${d.remainingVehicleAllowance}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Remaining Salary</span>
-                            <span class="font-medium text-green-600">₹${d.remainingSalary}</span>
-                        </div>
-                        <div class="border-t pt-2 flex justify-between text-sm font-bold">
-                            <span class="text-gray-700">Will be added to Savings</span>
-                            <span class="text-green-600">₹${total}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">Current Total Savings</span>
-                            <span class="font-medium text-blue-600">₹${d.savingsAmount}</span>
-                        </div>
-                        <div class="flex justify-between text-sm font-bold">
-                            <span class="text-gray-700">New Total Savings</span>
-                            <span class="text-blue-600">₹${(parseFloat(d.savingsAmount) + parseFloat(total)).toFixed(2)}</span>
-                        </div>
+
+                card.innerHTML = `
+                    <h2 style="font-size:16px;font-weight:700;color:#1f2937;margin-bottom:12px;">What goes to savings</h2>
+                    <div class="row"><span style="font-size:14px;color:#6b7280;">Remaining General Allowance</span><span style="font-weight:700;color:#16a34a;">₹${fmt(d.remainingAllowance)}</span></div>
+                    <div class="row"><span style="font-size:14px;color:#6b7280;">Remaining Vehicle Allowance</span><span style="font-weight:700;color:#16a34a;">₹${fmt(d.remainingVehicleAllowance)}</span></div>
+                    <div class="row"><span style="font-size:14px;color:#6b7280;">Remaining Salary</span><span style="font-weight:700;color:#16a34a;">₹${fmt(d.remainingSalary)}</span></div>
+                    <div style="padding:12px 0;display:flex;justify-content:space-between;">
+                        <span style="font-size:15px;font-weight:700;color:#1f2937;">Total to Savings</span>
+                        <span style="font-size:18px;font-weight:800;color:#16a34a;">₹${fmt(total)}</span>
+                    </div>
+                    <div style="background:#f0fdf4;border-radius:10px;padding:12px;display:flex;justify-content:space-between;">
+                        <span style="font-size:13px;color:#6b7280;">New Total Savings</span>
+                        <span style="font-size:15px;font-weight:700;color:#16a34a;">₹${fmt((parseFloat(d.savingsAmount) + parseFloat(total)).toFixed(2))}</span>
                     </div>`;
-            } catch {
-                document.getElementById('summary').innerHTML =
-                    '<p class="text-gray-400 text-sm">No active budget found for this month.</p>';
+            } catch(e) {
+                card.innerHTML = '<p style="color:#ef4444;font-size:14px;">Error loading summary</p>';
             }
         }
 
         async function closeMonth() {
-            if (!confirm('Close this month? This cannot be undone.')) return;
+            if (!confirm('Close this month? All remaining allowances and salary move to savings.')) return;
             try {
-                const res = await fetch(`${API}/api/budget/month-end`, { method: 'POST' });
-                if (!res.ok) {
-                    const e = await res.json();
-                    alert(e.message || 'Error closing month');
-                    return;
-                }
+                const res = await fetch(`${API}/api/budget/month-end`, {method:'POST'});
+                if (!res.ok) { const e = await res.json(); alert(e.message || 'Error'); return; }
                 const d = await res.json();
-                const result = document.getElementById('result');
-                result.classList.remove('hidden');
-                result.innerHTML = `
-                    <h2 class="font-bold text-green-700 mb-3">✅ Month Closed Successfully</h2>
-                    <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">From General Allowance</span>
-                            <span class="font-medium">₹${d.allowanceSaved}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">From Vehicle Allowance</span>
-                            <span class="font-medium">₹${d.vehicleSaved}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">From Salary</span>
-                            <span class="font-medium">₹${d.salarySaved}</span>
-                        </div>
-                        <div class="border-t pt-2 flex justify-between text-sm font-bold">
-                            <span class="text-gray-700">Total Added to Savings</span>
-                            <span class="text-green-600">₹${d.totalAddedToSavings}</span>
-                        </div>
-                        <div class="flex justify-between text-sm font-bold">
-                            <span class="text-gray-700">New Total Savings</span>
-                            <span class="text-blue-600">₹${d.newTotalSavings}</span>
-                        </div>
+                const rc = document.getElementById('resultCard');
+                rc.style.display = 'block';
+                rc.innerHTML = `
+                    <h2 style="font-size:16px;font-weight:700;color:#16a34a;margin-bottom:12px;">✅ Month Closed!</h2>
+                    <div class="row"><span style="color:#6b7280;font-size:14px;">From General Allowance</span><span style="font-weight:600;">₹${fmt(d.allowanceSaved)}</span></div>
+                    <div class="row"><span style="color:#6b7280;font-size:14px;">From Vehicle Allowance</span><span style="font-weight:600;">₹${fmt(d.vehicleSaved)}</span></div>
+                    <div class="row"><span style="color:#6b7280;font-size:14px;">From Salary</span><span style="font-weight:600;">₹${fmt(d.salarySaved)}</span></div>
+                    <div style="padding:12px 0;display:flex;justify-content:space-between;">
+                        <span style="font-size:15px;font-weight:700;color:#1f2937;">Total Saved</span>
+                        <span style="font-size:18px;font-weight:800;color:#16a34a;">₹${fmt(d.totalAddedToSavings)}</span>
                     </div>
-                    <a href="budget.html"
-                        class="block mt-4 bg-blue-600 text-white rounded-lg p-3 text-center text-sm font-medium">
+                    <div style="background:#f0fdf4;border-radius:10px;padding:12px;display:flex;justify-content:space-between;margin-bottom:12px;">
+                        <span style="font-size:13px;color:#6b7280;">Total Savings Now</span>
+                        <span style="font-size:15px;font-weight:700;color:#16a34a;">₹${fmt(d.newTotalSavings)}</span>
+                    </div>
+                    <a href="budget.html" style="display:block;background:linear-gradient(135deg,#667eea,#764ba2);color:white;text-decoration:none;border-radius:10px;padding:13px;text-align:center;font-size:14px;font-weight:700;">
                         Create Next Month's Budget →
                     </a>`;
-            } catch (err) {
-                alert('Error: ' + err.message);
-            }
+                loadSummary();
+            } catch(e) { alert('Error: ' + e.message); }
         }
 
         async function resetAll() {
-            if (!confirm('⚠️ This will DELETE EVERYTHING — all expenses, people, profile and budget. Are you absolutely sure?')) return;
-            if (!confirm('Last chance — this cannot be undone. Delete everything?')) return;
-            await fetch(`${API}/api/budget/reset`, { method: 'DELETE' });
-            alert('App reset complete. Start fresh!');
-            window.location.href = 'budget.html';
+            if (!confirm('⚠️ DELETE EVERYTHING — all expenses, people, profile and budget?')) return;
+            if (!confirm('Last chance. This cannot be undone. Confirm reset?')) return;
+            const res = await fetch(`${API}/api/budget/reset`, {method:'DELETE'});
+            if (res.ok) { alert('App reset complete.'); window.location.href = 'budget.html'; }
+            else alert('Error resetting app');
         }
 
         loadSummary();

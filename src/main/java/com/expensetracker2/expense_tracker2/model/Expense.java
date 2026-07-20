@@ -3,9 +3,7 @@ package com.expensetracker2.expense_tracker2.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class Expense {
@@ -26,6 +24,8 @@ public class Expense {
 
     private LocalDate deadline;
     private boolean settled;
+    private boolean cash;
+
     private String paidByName;
     private String owedByName;
 
@@ -40,42 +40,41 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Category cannot be null")
     private Category category;
-    private boolean cash;
 
     public Expense() {}
 
     public Long getId() { return id; }
 
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String v) { this.description = v; }
 
     public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public void setAmount(BigDecimal v) { this.amount = v; }
 
     public LocalDate getSpendingDate() { return spendingDate; }
-    public void setSpendingDate(LocalDate spendingDate) { this.spendingDate = spendingDate; }
+    public void setSpendingDate(LocalDate v) { this.spendingDate = v; }
 
     public LocalDate getDeadline() { return deadline; }
-    public void setDeadline(LocalDate deadline) { this.deadline = deadline; }
+    public void setDeadline(LocalDate v) { this.deadline = v; }
 
     public boolean isSettled() { return settled; }
-    public void setSettled(boolean settled) { this.settled = settled; }
+    public void setSettled(boolean v) { this.settled = v; }
+
+    public boolean isCash() { return cash; }
+    public void setCash(boolean v) { this.cash = v; }
 
     public String getPaidByName() { return paidByName; }
-    public void setPaidByName(String paidByName) { this.paidByName = paidByName; }
+    public void setPaidByName(String v) { this.paidByName = v; }
 
     public String getOwedByName() { return owedByName; }
-    public void setOwedByName(String owedByName) { this.owedByName = owedByName; }
+    public void setOwedByName(String v) { this.owedByName = v; }
 
     public Person getPaidBy() { return paidBy; }
-    public void setPaidBy(Person paidBy) { this.paidBy = paidBy; }
+    public void setPaidBy(Person v) { this.paidBy = v; }
 
     public Person getOwedBy() { return owedBy; }
-    public void setOwedBy(Person owedBy) { this.owedBy = owedBy; }
+    public void setOwedBy(Person v) { this.owedBy = v; }
 
     public Category getCategory() { return category; }
-    public void setCategory(Category category) { this.category = category; }
-    
-    public boolean isCash() { return cash; }
-    public void setCash(boolean cash) { this.cash = cash; }
+    public void setCategory(Category v) { this.category = v; }
 }

@@ -3,121 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget</title>
+    <title>Budget · SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f8; }
+        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:16px; }
+        .input { width:100%; border:1.5px solid #e5e7eb; border-radius:10px; padding:12px; font-size:14px; outline:none; transition:border 0.2s; box-sizing:border-box; }
+        .input:focus { border-color:#667eea; }
+        .btn { width:100%; border:none; border-radius:10px; padding:13px; font-size:14px; font-weight:600; cursor:pointer; }
+        .stat-box { background:#f9fafb; border-radius:12px; padding:14px; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+<body>
+    <div style="background:linear-gradient(135deg,#f7971e,#ffd200);color:white;padding:48px 20px 20px;">
+        <h1 style="font-size:22px;font-weight:700;color:#1f2937;">Budget & Profile</h1>
     </div>
-    <div class="bg-white shadow-sm flex overflow-x-auto">
-        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
-        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
-        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
-        <a href="budget.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Budget</a>
-        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
-    </div>
-    <div class="p-4 space-y-4">
 
-        <div id="budgetStatus" class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-400 text-sm">Loading...</p>
+    <div style="padding:16px;padding-bottom:100px;max-width:480px;margin:0 auto;">
+
+        <!-- Status Card -->
+        <div class="card" id="statusCard">
+            <p style="color:#9ca3af;font-size:14px;">Loading status...</p>
         </div>
 
         <!-- Financial Profile -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="font-bold text-gray-700">Financial Profile</h2>
-                <button onclick="resetProfile()"
-                    class="text-xs text-red-500 border border-red-300 px-3 py-1 rounded-lg">Reset</button>
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <h2 style="font-size:16px;font-weight:700;color:#1f2937;">Financial Profile</h2>
+                <button onclick="resetProfile()" style="font-size:12px;color:#ef4444;border:1px solid #fca5a5;border-radius:8px;padding:4px 12px;background:white;cursor:pointer;">Reset</button>
             </div>
-            <p class="text-xs text-gray-400 mb-3">Fill all fields to setup or update. Leave blank to keep existing.</p>
-            <div class="space-y-3">
-                <input id="accountBalance" type="number" placeholder="Account Balance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="cashBalance" type="number" placeholder="Cash in Hand (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="salaryAmount" type="number" placeholder="Monthly Salary (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="savingsAmount" type="number" placeholder="Current Savings (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="saveProfile()"
-                    class="w-full bg-blue-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Save Profile
-                </button>
+            <p style="font-size:12px;color:#9ca3af;margin-bottom:16px;">Auto-detects if profile exists. Fill only what you want to update.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <input id="accountBalance" class="input" type="number" placeholder="Bank Balance (₹)">
+                <input id="cashBalance" class="input" type="number" placeholder="Cash in Hand (₹)">
+                <input id="salaryAmount" class="input" type="number" placeholder="Monthly Salary (₹)">
+                <input id="savingsAmount" class="input" type="number" placeholder="Current Savings (₹)">
+                <button class="btn" onclick="saveProfile()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">Save Profile</button>
             </div>
         </div>
 
         <!-- Monthly Budget -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="font-bold text-gray-700">Monthly Budget</h2>
-                <button onclick="resetBudget()"
-                    class="text-xs text-red-500 border border-red-300 px-3 py-1 rounded-lg">Reset</button>
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <h2 style="font-size:16px;font-weight:700;color:#1f2937;">Monthly Budget</h2>
+                <button onclick="resetBudget()" style="font-size:12px;color:#ef4444;border:1px solid #fca5a5;border-radius:8px;padding:4px 12px;background:white;cursor:pointer;">Reset</button>
             </div>
-            <p class="text-xs text-gray-400 mb-3">Set or update this month's allowances.</p>
-            <div class="space-y-3">
-                <input id="totalAllowance" type="number" placeholder="General Allowance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <input id="vehicleAllowance" type="number" placeholder="Vehicle Allowance (₹)"
-                    class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500">
-                <button onclick="saveBudget()"
-                    class="w-full bg-green-600 text-white rounded-lg p-3 font-medium text-sm">
-                    Save Budget
-                </button>
+            <p style="font-size:12px;color:#9ca3af;margin-bottom:16px;">Auto-detects if budget exists. Creates new or updates existing.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <input id="totalAllowance" class="input" type="number" placeholder="General Allowance (₹)">
+                <input id="vehicleAllowance" class="input" type="number" placeholder="Vehicle Allowance (₹)">
+                <button class="btn" onclick="saveBudget()" style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;">Save Budget</button>
             </div>
         </div>
 
     </div>
+
+    <!-- Bottom Nav -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+        <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">🏠</span>Home</a>
+        <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">💸</span>Expenses</a>
+        <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">👥</span>People</a>
+        <a href="budget.html" style="display:flex;flex-direction:column;align-items:center;color:#f7971e;text-decoration:none;font-size:11px;font-weight:600;"><span style="font-size:22px">📊</span>Budget</a>
+        <a href="month-end.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📅</span>Month End</a>
+    </div>
+
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
 
-        async function loadBudgetStatus() {
+        function fmt(v) {
+            return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+        }
+
+        async function loadStatus() {
+            const card = document.getElementById('statusCard');
             try {
-                const [summaryRes, budgetRes] = await Promise.all([
+                const [sr, br] = await Promise.all([
                     fetch(`${API}/api/budget/summary`),
                     fetch(`${API}/api/budget/monthly/current`)
                 ]);
-                if (!summaryRes.ok) throw new Error();
-                const d = await summaryRes.json();
-                let budgetHtml = '';
-                if (budgetRes.ok) {
-                    const b = await budgetRes.json();
-                    const aSpent = (parseFloat(b.totalAllowance) - parseFloat(d.remainingAllowance)).toFixed(2);
-                    const vSpent = (parseFloat(b.vehicleAllowance) - parseFloat(d.remainingVehicleAllowance)).toFixed(2);
+                if (!sr.ok) { card.innerHTML = '<p style="color:#9ca3af;font-size:14px;">No profile yet. Set one up below.</p>'; return; }
+                const d = await sr.json();
+
+                let budgetHtml = '<p style="color:#9ca3af;font-size:13px;margin-top:8px;">No budget for this month yet.</p>';
+                if (br.ok) {
+                    const b = await br.json();
+                    const aSpent = (parseFloat(b.totalAllowance) - parseFloat(d.remainingAllowance)).toFixed(0);
+                    const vSpent = (parseFloat(b.vehicleAllowance) - parseFloat(d.remainingVehicleAllowance)).toFixed(0);
                     budgetHtml = `
-                        <div class="bg-blue-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">General Allowance</p>
-                            <p class="font-bold text-blue-600 text-sm">₹${b.totalAllowance} - ₹${aSpent} : ₹${d.remainingAllowance}</p>
-                        </div>
-                        <div class="bg-orange-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Vehicle Allowance</p>
-                            <p class="font-bold text-orange-600 text-sm">₹${b.vehicleAllowance} - ₹${vSpent} : ₹${d.remainingVehicleAllowance}</p>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+                            <div class="stat-box">
+                                <p style="font-size:11px;color:#9ca3af;font-weight:600;">GENERAL</p>
+                                <p style="font-size:15px;font-weight:700;color:#2563eb;">₹${fmt(d.remainingAllowance)}</p>
+                                <p style="font-size:11px;color:#9ca3af;">₹${aSpent} used of ₹${fmt(b.totalAllowance)}</p>
+                            </div>
+                            <div class="stat-box">
+                                <p style="font-size:11px;color:#9ca3af;font-weight:600;">VEHICLE</p>
+                                <p style="font-size:15px;font-weight:700;color:#ea580c;">₹${fmt(d.remainingVehicleAllowance)}</p>
+                                <p style="font-size:11px;color:#9ca3af;">₹${vSpent} used of ₹${fmt(b.vehicleAllowance)}</p>
+                            </div>
                         </div>`;
                 }
-                document.getElementById('budgetStatus').innerHTML = `
-                    <h2 class="font-bold text-gray-700 mb-3">Current Status</h2>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-blue-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Account Balance</p>
-                            <p class="font-bold text-blue-600">₹${d.accountBalance}</p>
+
+                card.innerHTML = `
+                    <h2 style="font-size:16px;font-weight:700;color:#1f2937;margin-bottom:12px;">Current Status</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                        <div class="stat-box">
+                            <p style="font-size:11px;color:#9ca3af;font-weight:600;">BANK BALANCE</p>
+                            <p style="font-size:16px;font-weight:700;color:#667eea;">₹${fmt(d.accountBalance)}</p>
                         </div>
-                        <div class="bg-yellow-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Cash in Hand</p>
-                            <p class="font-bold text-yellow-600">₹${d.cashBalance}</p>
+                        <div class="stat-box">
+                            <p style="font-size:11px;color:#9ca3af;font-weight:600;">CASH IN HAND</p>
+                            <p style="font-size:16px;font-weight:700;color:#d97706;">₹${fmt(d.cashBalance)}</p>
                         </div>
-                        <div class="bg-green-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Savings</p>
-                            <p class="font-bold text-green-600">₹${d.savingsAmount}</p>
+                        <div class="stat-box">
+                            <p style="font-size:11px;color:#9ca3af;font-weight:600;">SAVINGS</p>
+                            <p style="font-size:16px;font-weight:700;color:#16a34a;">₹${fmt(d.savingsAmount)}</p>
                         </div>
-                        <div class="bg-purple-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500">Remaining Salary</p>
-                            <p class="font-bold text-purple-600">₹${d.remainingSalary}</p>
+                        <div class="stat-box">
+                            <p style="font-size:11px;color:#9ca3af;font-weight:600;">SALARY LEFT</p>
+                            <p style="font-size:16px;font-weight:700;color:#7c3aed;">₹${fmt(d.remainingSalary)}</p>
+                            <p style="font-size:11px;color:#9ca3af;">of ₹${fmt(d.salaryAmount)}</p>
                         </div>
-                        ${budgetHtml}
-                    </div>`;
-            } catch {
-                document.getElementById('budgetStatus').innerHTML =
-                    '<p class="text-gray-400 text-sm">No profile set up yet. Use the form below.</p>';
+                    </div>
+                    ${budgetHtml}`;
+            } catch(e) {
+                card.innerHTML = '<p style="color:#ef4444;font-size:14px;">Error loading status</p>';
             }
         }
 
@@ -127,38 +137,31 @@
             const s = document.getElementById('salaryAmount').value;
             const sav = document.getElementById('savingsAmount').value;
 
-            // Check if profile exists
             const checkRes = await fetch(`${API}/api/budget/profile`);
 
             if (!checkRes.ok) {
-                // Setup new profile
-                if (!a || !c || !s) { alert('Fill account balance, cash and salary to setup'); return; }
+                if (!a || !c || !s) { alert('Bank balance, cash balance and salary are required for first setup.'); return; }
                 const res = await fetch(`${API}/api/budget/profile/setup`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({
-                        accountBalance: parseFloat(a),
-                        cashBalance: parseFloat(c),
-                        salaryAmount: parseFloat(s),
-                        initialSavings: sav ? parseFloat(sav) : 0
+                        accountBalance: parseFloat(a), cashBalance: parseFloat(c),
+                        salaryAmount: parseFloat(s), initialSavings: sav ? parseFloat(sav) : 0
                     })
                 });
-                if (res.ok) { alert('Profile created!'); clearProfileFields(); loadBudgetStatus(); }
+                if (res.ok) { alert('Profile created!'); clearProfile(); loadStatus(); }
                 else { const e = await res.json(); alert(e.message || 'Error'); }
             } else {
-                // Update existing
                 const body = {};
                 if (a) body.accountBalance = parseFloat(a);
                 if (c) body.cashBalance = parseFloat(c);
                 if (s) body.salaryAmount = parseFloat(s);
                 if (sav) body.savingsAmount = parseFloat(sav);
-                if (Object.keys(body).length === 0) { alert('Fill at least one field'); return; }
+                if (!Object.keys(body).length) { alert('Fill at least one field to update.'); return; }
                 const res = await fetch(`${API}/api/budget/profile/update`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    method:'PUT', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify(body)
                 });
-                if (res.ok) { alert('Profile updated!'); clearProfileFields(); loadBudgetStatus(); }
+                if (res.ok) { alert('Profile updated!'); clearProfile(); loadStatus(); }
                 else { const e = await res.json(); alert(e.message || 'Error'); }
             }
         }
@@ -166,62 +169,49 @@
         async function saveBudget() {
             const t = document.getElementById('totalAllowance').value;
             const v = document.getElementById('vehicleAllowance').value;
-            if (!t || !v) { alert('Fill both allowance fields'); return; }
+            if (!t || !v) { alert('Fill both allowance fields.'); return; }
 
             const checkRes = await fetch(`${API}/api/budget/monthly/current`);
 
             if (!checkRes.ok) {
-                // Create new budget
                 const res = await fetch(`${API}/api/budget/monthly`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        totalAllowance: parseFloat(t),
-                        vehicleAllowance: parseFloat(v)
-                    })
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({totalAllowance: parseFloat(t), vehicleAllowance: parseFloat(v)})
                 });
-                if (res.ok) { alert('Budget created!'); clearBudgetFields(); loadBudgetStatus(); }
+                if (res.ok) { alert('Budget created!'); clearBudget(); loadStatus(); }
                 else { const e = await res.json(); alert(e.message || 'Error'); }
             } else {
-                // Update existing
                 const res = await fetch(`${API}/api/budget/monthly/update`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        totalAllowance: parseFloat(t),
-                        vehicleAllowance: parseFloat(v)
-                    })
+                    method:'PUT', headers:{'Content-Type':'application/json'},
+                    body: JSON.stringify({totalAllowance: parseFloat(t), vehicleAllowance: parseFloat(v)})
                 });
-                if (res.ok) { alert('Budget updated!'); clearBudgetFields(); loadBudgetStatus(); }
+                if (res.ok) { alert('Budget updated!'); clearBudget(); loadStatus(); }
                 else { const e = await res.json(); alert(e.message || 'Error'); }
             }
         }
 
         async function resetProfile() {
-            if (!confirm('Reset financial profile? This deletes your profile but keeps expenses.')) return;
-            await fetch(`${API}/api/budget/profile/reset`, { method: 'DELETE' });
-            alert('Profile reset. Set up a new one below.');
-            loadBudgetStatus();
+            if (!confirm('Reset financial profile? Expenses and people will be kept.')) return;
+            const res = await fetch(`${API}/api/budget/profile/reset`, {method:'DELETE'});
+            if (res.ok) { alert('Profile reset.'); clearProfile(); loadStatus(); }
+            else alert('Error resetting profile');
         }
 
         async function resetBudget() {
-            if (!confirm('Reset this month\'s budget? This cannot be undone.')) return;
-            await fetch(`${API}/api/budget/monthly/reset`, { method: 'DELETE' });
-            alert('Budget reset. Create a new one below.');
-            loadBudgetStatus();
+            if (!confirm('Reset this month\'s budget?')) return;
+            const res = await fetch(`${API}/api/budget/monthly/reset`, {method:'DELETE'});
+            if (res.ok) { alert('Budget reset.'); clearBudget(); loadStatus(); }
+            else alert('Error resetting budget');
         }
 
-        function clearProfileFields() {
-            ['accountBalance','cashBalance','salaryAmount','savingsAmount']
-                .forEach(id => document.getElementById(id).value = '');
+        function clearProfile() {
+            ['accountBalance','cashBalance','salaryAmount','savingsAmount'].forEach(id => document.getElementById(id).value = '');
+        }
+        function clearBudget() {
+            ['totalAllowance','vehicleAllowance'].forEach(id => document.getElementById(id).value = '');
         }
 
-        function clearBudgetFields() {
-            ['totalAllowance','vehicleAllowance']
-                .forEach(id => document.getElementById(id).value = '');
-        }
-
-        loadBudgetStatus();
+        loadStatus();
     </script>
 </body>
 </html>

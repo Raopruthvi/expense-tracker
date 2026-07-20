@@ -3,135 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>People</title>
+    <title>People · SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f8; }
+        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:12px; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
+<body>
+    <div style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;padding:48px 20px 20px;">
+        <h1 style="font-size:22px;font-weight:700;">People</h1>
+        <p style="font-size:13px;opacity:0.8;margin-top:4px;">Showing people with pending balances</p>
     </div>
-    <div class="bg-white shadow-sm flex overflow-x-auto">
-        <a href="index.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Dashboard</a>
-        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
-        <a href="people.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">People</a>
-        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
-        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
-    </div>
-    <div class="p-4 space-y-4">
-        <div id="peopleList" class="space-y-3">
-            <div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">Loading...</div>
+
+    <div style="padding:16px;padding-bottom:100px;max-width:480px;margin:0 auto;">
+        <div id="peopleList">
+            <div class="card" style="text-align:center;color:#9ca3af;">Loading...</div>
         </div>
     </div>
 
-    <!-- Detail Modal -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center z-50">
-        <div class="bg-white rounded-t-2xl p-6 w-full max-w-lg max-h-96 overflow-y-auto">
-            <h3 class="font-bold text-lg mb-4" id="modalName"></h3>
-            <div id="modalContent" class="space-y-3"></div>
-            <button onclick="closeModal()"
-                class="w-full mt-4 bg-gray-100 text-gray-700 rounded-lg p-3 font-medium">Close</button>
+    <!-- Modal -->
+    <div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:50;align-items:flex-end;justify-content:center;">
+        <div style="background:white;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h3 id="modalName" style="font-size:18px;font-weight:700;color:#1f2937;"></h3>
+                <button onclick="closeModal()" style="padding:4px 12px;border-radius:8px;border:none;background:#f3f4f6;color:#6b7280;cursor:pointer;font-size:13px;">Close</button>
+            </div>
+            <div id="modalContent"></div>
         </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+        <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">🏠</span>Home</a>
+        <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">💸</span>Expenses</a>
+        <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#11998e;text-decoration:none;font-size:11px;font-weight:600;"><span style="font-size:22px">👥</span>People</a>
+        <a href="budget.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📊</span>Budget</a>
+        <a href="month-end.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">📅</span>Month End</a>
     </div>
 
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
+        const OWNER = 'mani';
+
+        function fmt(v) {
+            return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+        }
 
         async function loadPeople() {
-            const [peopleRes, expensesRes] = await Promise.all([
+            const [pr, er] = await Promise.all([
                 fetch(`${API}/api/people`),
                 fetch(`${API}/api/expenses`)
             ]);
-            const people = await peopleRes.json();
-            const expenses = await expensesRes.json();
+            const people = await pr.json();
+            const expenses = await er.json();
             const list = document.getElementById('peopleList');
 
-            const unsettled = expenses.filter(e => !e.isSettled);
+            const unsettled = expenses.filter(e => !e.settled);
 
-            // Build per-person summary
             const summaries = people.map(p => {
-                const owesMe = expenses.filter(e =>
-                    !e.settled &&
-                    e.paidBy && e.paidBy.id === p.id &&
-                    e.owedBy && e.owedBy.name !== (e.paidBy ? e.paidBy.name : '')
+                const relevant = unsettled.filter(e =>
+                    (e.paidBy && e.paidBy.id === p.id) ||
+                    (e.owedBy && e.owedBy.id === p.id)
                 );
-                const iOwe = expenses.filter(e =>
-                    !e.settled &&
-                    e.owedBy && e.owedBy.id === p.id
-                );
+                if (!relevant.length) return null;
 
-                // Expenses involving this person
-                const relevant = expenses.filter(e =>
-                    !e.settled && (
-                        (e.paidBy && e.paidBy.id === p.id) ||
-                        (e.owedBy && e.owedBy.id === p.id)
-                    )
-                );
+                const theyOweMe = relevant.filter(e =>
+                    e.owedBy && e.owedBy.id === p.id);
+                const iOweThem = relevant.filter(e =>
+                    e.paidBy && e.paidBy.id === p.id);
 
-                return { person: p, expenses: relevant };
-            }).filter(s => s.expenses.length > 0);
+                const theyOweMeTotal = theyOweMe.reduce((s,e) => s + parseFloat(e.amount), 0);
+                const iOweThemTotal = iOweThem.reduce((s,e) => s + parseFloat(e.amount), 0);
 
-            if (summaries.length === 0) {
-                list.innerHTML = '<div class="bg-white rounded-xl shadow p-6 text-center text-gray-400">No pending balances 🎉</div>';
+                return { person: p, theyOweMe, iOweThem, theyOweMeTotal, iOweThemTotal };
+            }).filter(Boolean);
+
+            if (!summaries.length) {
+                list.innerHTML = '<div class="card" style="text-align:center;color:#9ca3af;padding:32px;">🎉 All settled up!</div>';
                 return;
             }
 
-            list.innerHTML = summaries.map(s => {
-                const p = s.person;
-                const owesToMani = s.expenses
-                    .filter(e => e.owedBy && e.owedBy.id === p.id)
-                    .reduce((sum, e) => sum + parseFloat(e.amount), 0);
-                const maniOwes = s.expenses
-                    .filter(e => e.paidBy && e.paidBy.id === p.id)
-                    .reduce((sum, e) => sum + parseFloat(e.amount), 0);
-
-                return `
-                <div class="bg-white rounded-xl shadow p-4" onclick="viewDetails(${p.id}, '${p.name}')">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="font-bold text-gray-800 text-base">${p.name}</p>
-                            ${owesToMani > 0 ? `<p class="text-sm text-green-600 mt-1">Owes you: ₹${owesToMani.toFixed(2)}</p>` : ''}
-                            ${maniOwes > 0 ? `<p class="text-sm text-red-500 mt-1">You owe: ₹${maniOwes.toFixed(2)}</p>` : ''}
+            list.innerHTML = summaries.map(s => `
+                <div class="card" onclick="openModal(${JSON.stringify(s).replace(/"/g,'&quot;')})" style="cursor:pointer;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:18px;">
+                                ${s.person.name[0].toUpperCase()}
+                            </div>
+                            <div>
+                                <p style="font-size:16px;font-weight:700;color:#1f2937;">${s.person.name}</p>
+                                <p style="font-size:12px;color:#6b7280;margin-top:2px;">${s.theyOweMe.length + s.iOweThem.length} pending</p>
+                            </div>
                         </div>
-                        <span class="text-gray-400 text-sm">Tap for details →</span>
+                        <div style="text-align:right;">
+                            ${s.theyOweMeTotal > 0 ? `<p style="font-size:14px;font-weight:700;color:#16a34a;">+₹${fmt(s.theyOweMeTotal)}</p>` : ''}
+                            ${s.iOweThemTotal > 0 ? `<p style="font-size:14px;font-weight:700;color:#dc2626;">-₹${fmt(s.iOweThemTotal)}</p>` : ''}
+                        </div>
                     </div>
-                    <div class="mt-2 space-y-1">
-                        ${s.expenses.slice(0, 2).map(e => `
-                            <p class="text-xs text-gray-500">
-                                ${e.owedBy && e.owedBy.id === p.id ? '← Owes' : 'You owe →'}
-                                ₹${e.amount} for ${e.description}
-                            </p>
-                        `).join('')}
-                        ${s.expenses.length > 2 ? `<p class="text-xs text-gray-400">+${s.expenses.length - 2} more</p>` : ''}
-                    </div>
-                </div>`;
-            }).join('');
+                </div>
+            `).join('');
         }
 
-        async function viewDetails(id, name) {
-            const res = await fetch(`${API}/api/people/${id}/expenses`);
-            const expenses = await res.json();
+        function openModal(s) {
+            document.getElementById('modalName').textContent = s.person.name;
+            let html = '';
 
-            document.getElementById('modalName').textContent = name;
-            document.getElementById('modalContent').innerHTML = expenses.length === 0 ?
-                '<p class="text-gray-400 text-sm">No pending expenses</p>' :
-                expenses.map(e => `
-                    <div class="border-b pb-2">
-                        <div class="flex justify-between">
-                            <p class="text-sm font-medium text-gray-800">${e.description}</p>
-                            <p class="text-sm font-bold text-blue-600">₹${e.amount}</p>
+            if (s.theyOweMe.length) {
+                html += `<p style="font-size:13px;font-weight:700;color:#16a34a;margin-bottom:8px;">THEY OWE YOU</p>`;
+                html += s.theyOweMe.map(e => `
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;">
+                        <div>
+                            <p style="font-size:14px;font-weight:600;color:#1f2937;">${e.description}</p>
+                            <p style="font-size:12px;color:#9ca3af;">${e.category}${e.deadline ? ' · Due: ' + e.deadline : ''}</p>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">
-                            ${e.owedBy === name ? 'Owes you' : 'You owe'} · ${e.category}
-                            ${e.deadline ? ' · Due: ' + e.deadline : ''}
-                        </p>
+                        <p style="font-size:15px;font-weight:700;color:#16a34a;">₹${fmt(e.amount)}</p>
                     </div>
                 `).join('');
+            }
 
-            document.getElementById('modal').classList.remove('hidden');
+            if (s.iOweThem.length) {
+                html += `<p style="font-size:13px;font-weight:700;color:#dc2626;margin-top:16px;margin-bottom:8px;">YOU OWE THEM</p>`;
+                html += s.iOweThem.map(e => `
+                    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f3f4f6;">
+                        <div>
+                            <p style="font-size:14px;font-weight:600;color:#1f2937;">${e.description}</p>
+                            <p style="font-size:12px;color:#9ca3af;">${e.category}${e.deadline ? ' · Due: ' + e.deadline : ''}</p>
+                        </div>
+                        <p style="font-size:15px;font-weight:700;color:#dc2626;">₹${fmt(e.amount)}</p>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('modal').style.display = 'flex';
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.add('hidden');
+            document.getElementById('modal').style.display = 'none';
         }
 
         loadPeople();

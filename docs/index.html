@@ -3,123 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
+    <title>SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+        .gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .gradient-green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .gradient-orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+        .gradient-purple { background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%); }
+        .progress-bar { height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold">💰 Expense Tracker</h1>
-        <span id="currentDate" class="text-sm"></span>
-    </div>
-    <div class="bg-white shadow-sm flex overflow-x-auto">
-        <a href="index.html" class="px-4 py-3 text-blue-600 border-b-2 border-blue-600 font-medium text-sm whitespace-nowrap">Dashboard</a>
-        <a href="expenses.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Expenses</a>
-        <a href="people.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">People</a>
-        <a href="budget.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Budget</a>
-        <a href="month-end.html" class="px-4 py-3 text-gray-600 text-sm whitespace-nowrap">Month End</a>
-    </div>
-    <div class="p-4 space-y-4">
-        <div class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-500 text-sm">Account Balance</p>
-            <p id="accountBalance" class="text-3xl font-bold text-blue-600 mt-1">Loading...</p>
-            <p class="text-gray-500 text-sm mt-2">Cash in hand: <span id="cashBalance" class="font-medium text-gray-700">-</span></p>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-500 text-sm">Total Savings</p>
-            <p id="savingsAmount" class="text-3xl font-bold text-green-600 mt-1">Loading...</p>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4 flex justify-between items-center">
+<body style="background:#f0f4f8; min-height:100vh; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+
+    <!-- Header -->
+    <div class="gradient-blue text-white px-5 pt-12 pb-16">
+        <div class="flex justify-between items-start">
             <div>
-                <p class="text-gray-500 text-sm">Remaining Salary</p>
-                <p id="remainingSalary" class="text-2xl font-bold text-purple-600 mt-1">-</p>
+                <p class="text-blue-200 text-sm">Good day, Mani 👋</p>
+                <h1 class="text-2xl font-bold mt-1">SpendSmart</h1>
             </div>
-            <div class="text-right">
-                <p class="text-gray-500 text-sm">Monthly Salary</p>
-                <p id="salaryAmount" class="text-lg font-medium text-gray-700 mt-1">-</p>
-            </div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <p class="text-gray-700 font-medium mb-3">Monthly Allowances</p>
-            <div class="space-y-3">
-                <div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-500">General Allowance</span>
-                        <span id="remainingAllowance" class="font-medium text-right text-xs">-</span>
-                    </div>
-                    <div class="bg-gray-200 rounded-full h-2">
-                        <div id="allowanceBar" class="bg-blue-500 h-2 rounded-full transition-all" style="width:0%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="text-gray-500">Vehicle Allowance</span>
-                        <span id="remainingVehicle" class="font-medium text-right text-xs">-</span>
-                    </div>
-                    <div class="bg-gray-200 rounded-full h-2">
-                        <div id="vehicleBar" class="bg-orange-500 h-2 rounded-full transition-all" style="width:0%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-            <a href="expenses.html" class="bg-blue-600 text-white rounded-xl p-4 text-center">
-                <div class="text-2xl mb-1">➕</div>
-                <div class="text-sm font-medium">Add Expense</div>
-            </a>
-            <a href="people.html" class="bg-purple-600 text-white rounded-xl p-4 text-center">
-                <div class="text-2xl mb-1">👥</div>
-                <div class="text-sm font-medium">People</div>
-            </a>
-            <a href="budget.html" class="bg-green-600 text-white rounded-xl p-4 text-center">
-                <div class="text-2xl mb-1">📊</div>
-                <div class="text-sm font-medium">Budget</div>
-            </a>
-            <a href="month-end.html" class="bg-orange-600 text-white rounded-xl p-4 text-center">
-                <div class="text-2xl mb-1">📅</div>
-                <div class="text-sm font-medium">Month End</div>
-            </a>
+            <p id="currentDate" class="text-blue-200 text-sm mt-2"></p>
         </div>
     </div>
+
+    <!-- Main Balance Card (overlapping) -->
+    <div class="px-4 -mt-8">
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <p class="text-gray-500 text-sm font-medium">BANK BALANCE</p>
+                <p class="text-gray-500 text-sm font-medium">CASH IN HAND</p>
+            </div>
+            <div class="flex justify-between items-center">
+                <p id="accountBalance" class="text-3xl font-bold text-gray-800">--</p>
+                <div class="w-px h-8 bg-gray-200"></div>
+                <p id="cashBalance" class="text-3xl font-bold text-gray-800 text-right">--</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="px-4 mt-4 grid grid-cols-2 gap-3">
+        <div class="card">
+            <p class="text-xs text-gray-500 font-medium">SAVINGS</p>
+            <p id="savingsAmount" class="text-xl font-bold text-green-600 mt-1">--</p>
+        </div>
+        <div class="card">
+            <p class="text-xs text-gray-500 font-medium">SALARY LEFT</p>
+            <p id="remainingSalary" class="text-xl font-bold text-purple-600 mt-1">--</p>
+            <p class="text-xs text-gray-400 mt-1">of <span id="salaryAmount">--</span></p>
+        </div>
+    </div>
+
+    <!-- Allowances -->
+    <div class="px-4 mt-4">
+        <div class="card">
+            <h3 class="font-semibold text-gray-700 mb-4">Monthly Allowances</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600 font-medium">General</span>
+                        <span id="allowanceText" class="text-gray-500 text-xs">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="allowanceBar" class="progress-fill bg-blue-500" style="width:0%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-sm mb-2">
+                        <span class="text-gray-600 font-medium">Vehicle</span>
+                        <span id="vehicleText" class="text-gray-500 text-xs">--</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="vehicleBar" class="progress-fill bg-orange-500" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="px-4 mt-4 grid grid-cols-2 gap-3">
+        <a href="expenses.html" class="card text-center py-4 block" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:16px;text-decoration:none;">
+            <div class="text-2xl mb-1">➕</div>
+            <div class="text-sm font-semibold">Add Expense</div>
+        </a>
+        <a href="people.html" class="card text-center py-4 block" style="background:linear-gradient(135deg,#11998e,#38ef7d);color:white;border-radius:16px;text-decoration:none;">
+            <div class="text-2xl mb-1">👥</div>
+            <div class="text-sm font-semibold">People</div>
+        </a>
+        <a href="budget.html" class="card text-center py-4 block" style="background:linear-gradient(135deg,#f7971e,#ffd200);color:white;border-radius:16px;text-decoration:none;">
+            <div class="text-2xl mb-1">📊</div>
+            <div class="text-sm font-semibold">Budget</div>
+        </a>
+        <a href="month-end.html" class="card text-center py-4 block" style="background:linear-gradient(135deg,#8e2de2,#4a00e0);color:white;border-radius:16px;text-decoration:none;">
+            <div class="text-2xl mb-1">📅</div>
+            <div class="text-sm font-semibold">Month End</div>
+        </a>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div style="height:80px"></div>
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+        <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#667eea;text-decoration:none;font-size:11px;font-weight:600;">
+            <span style="font-size:22px">🏠</span>Home
+        </a>
+        <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;">
+            <span style="font-size:22px">💸</span>Expenses
+        </a>
+        <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;">
+            <span style="font-size:22px">👥</span>People
+        </a>
+        <a href="budget.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;">
+            <span style="font-size:22px">📊</span>Budget
+        </a>
+        <a href="month-end.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;">
+            <span style="font-size:22px">📅</span>Month End
+        </a>
+    </div>
+
     <script>
         const API = 'https://expense-tracker-production-8665.up.railway.app';
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', {
-            day: 'numeric', month: 'short', year: 'numeric'
-        });
-        async function loadDashboard() {
+
+        document.getElementById('currentDate').textContent =
+            new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+
+        async function load() {
             try {
-                const [summaryRes, budgetRes] = await Promise.all([
+                const [sr, br] = await Promise.all([
                     fetch(`${API}/api/budget/summary`),
                     fetch(`${API}/api/budget/monthly/current`)
                 ]);
-                if (!summaryRes.ok) throw new Error('No setup');
-                const d = await summaryRes.json();
-                document.getElementById('accountBalance').textContent = `₹${d.accountBalance}`;
-                document.getElementById('cashBalance').textContent = `₹${d.cashBalance}`;
-                document.getElementById('savingsAmount').textContent = `₹${d.savingsAmount}`;
-                document.getElementById('remainingSalary').textContent = `₹${d.remainingSalary}`;
-                document.getElementById('salaryAmount').textContent = `₹${d.salaryAmount}`;
-                if (budgetRes.ok) {
-                    const b = await budgetRes.json();
-                    const aSpent = (parseFloat(b.totalAllowance) - parseFloat(d.remainingAllowance)).toFixed(2);
-                    const vSpent = (parseFloat(b.vehicleAllowance) - parseFloat(d.remainingVehicleAllowance)).toFixed(2);
-                    document.getElementById('remainingAllowance').textContent =
-                        `₹${b.totalAllowance} - ₹${aSpent} : ₹${d.remainingAllowance}`;
-                    document.getElementById('remainingVehicle').textContent =
-                        `₹${b.vehicleAllowance} - ₹${vSpent} : ₹${d.remainingVehicleAllowance}`;
+                if (!sr.ok) return;
+                const d = await sr.json();
+                document.getElementById('accountBalance').textContent = `₹${fmt(d.accountBalance)}`;
+                document.getElementById('cashBalance').textContent = `₹${fmt(d.cashBalance)}`;
+                document.getElementById('savingsAmount').textContent = `₹${fmt(d.savingsAmount)}`;
+                document.getElementById('remainingSalary').textContent = `₹${fmt(d.remainingSalary)}`;
+                document.getElementById('salaryAmount').textContent = `₹${fmt(d.salaryAmount)}`;
+
+                if (br.ok) {
+                    const b = await br.json();
+                    const aSpent = (parseFloat(b.totalAllowance) - parseFloat(d.remainingAllowance)).toFixed(0);
+                    const vSpent = (parseFloat(b.vehicleAllowance) - parseFloat(d.remainingVehicleAllowance)).toFixed(0);
+                    document.getElementById('allowanceText').textContent =
+                        `₹${aSpent} used · ₹${fmt(d.remainingAllowance)} left`;
+                    document.getElementById('vehicleText').textContent =
+                        `₹${vSpent} used · ₹${fmt(d.remainingVehicleAllowance)} left`;
                     const aPct = Math.min(100, parseFloat(d.remainingAllowance) / parseFloat(b.totalAllowance) * 100);
                     const vPct = Math.min(100, parseFloat(d.remainingVehicleAllowance) / parseFloat(b.vehicleAllowance) * 100);
-                    document.getElementById('allowanceBar').style.width = `${aPct}%`;
-                    document.getElementById('vehicleBar').style.width = `${vPct}%`;
-                } else {
-                    document.getElementById('remainingAllowance').textContent = `₹${d.remainingAllowance}`;
-                    document.getElementById('remainingVehicle').textContent = `₹${d.remainingVehicleAllowance}`;
+                    document.getElementById('allowanceBar').style.width = aPct + '%';
+                    document.getElementById('vehicleBar').style.width = vPct + '%';
                 }
-            } catch {
+            } catch(e) {
                 document.getElementById('accountBalance').textContent = 'Setup needed';
-                document.getElementById('savingsAmount').textContent = '₹0';
             }
         }
-        loadDashboard();
+
+        function fmt(v) {
+            return parseFloat(v).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+        }
+
+        load();
     </script>
 </body>
 </html>

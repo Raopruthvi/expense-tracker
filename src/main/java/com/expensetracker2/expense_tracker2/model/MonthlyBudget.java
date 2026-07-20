@@ -1,104 +1,56 @@
 package com.expensetracker2.expense_tracker2.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.GeneratedValue;
-
 import java.math.BigDecimal;
-import java.time.Month;
-
-
+import jakarta.persistence.*;
 
 @Entity
 public class MonthlyBudget {
-	
-	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long id;
-	
-	@Column(name = "budget_month")
-	private int month;
-	
-	@Column(name = "budget_year")
-	private int year;
-	
-	private BigDecimal totalAllowance;
-	private BigDecimal remainingAllowance;
-	private BigDecimal vehicleAllowance;
-	private BigDecimal remainingVehicleAllowance;
-	
-	private boolean closed;
-	
-	public MonthlyBudget() {
-		
-	}
-	
-	public MonthlyBudget(int month, int year, BigDecimal totalAllowance, BigDecimal vehicleAllowance) {
-		
-		this.month=month;
-		this.year=year;
-		this.totalAllowance=totalAllowance;
-		this.remainingAllowance=totalAllowance;
-		this.vehicleAllowance=vehicleAllowance;
-		this.remainingVehicleAllowance=vehicleAllowance;
-		this.closed=false;
-		
-	}
 
-	public Long getId() {
-		return id;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	public int getMonth() {
-		return month;
-	}
+    @Column(name = "budget_month")
+    private int month;
 
-	public int getYear() {
-		return year;
-	}
+    @Column(name = "budget_year")
+    private int year;
 
-	public BigDecimal getTotalAllowance() {
-		return totalAllowance;
-	}
+    private BigDecimal totalAllowance;
+    private BigDecimal remainingAllowance;
+    private BigDecimal vehicleAllowance;
+    private BigDecimal remainingVehicleAllowance;
+    private boolean closed;
 
-	public void setTotalAllowance(BigDecimal totalAllowance) {
-		this.totalAllowance = totalAllowance;
-	}
+    public MonthlyBudget() {}
 
-	public BigDecimal getRemainingAllowance() {
-		return remainingAllowance;
-	}
+    public MonthlyBudget(int month, int year,
+                         BigDecimal totalAllowance, BigDecimal vehicleAllowance) {
+        this.month = month;
+        this.year = year;
+        this.totalAllowance = totalAllowance;
+        this.remainingAllowance = totalAllowance;
+        this.vehicleAllowance = vehicleAllowance;
+        this.remainingVehicleAllowance = vehicleAllowance;
+        this.closed = false;
+    }
 
-	public void setRemainingAllowance(BigDecimal remainingAllowance) {
-		this.remainingAllowance = remainingAllowance;
-	}
+    public Long getId() { return id; }
+    public int getMonth() { return month; }
+    public int getYear() { return year; }
 
-	public BigDecimal getVehicleAllowance() {
-		return vehicleAllowance;
-	}
-	
-	public void setVehicleAllowance(BigDecimal vehicleAllowance) {
-	    this.vehicleAllowance = vehicleAllowance;
-	}
+    public BigDecimal getTotalAllowance() { return totalAllowance; }
+    public void setTotalAllowance(BigDecimal v) { this.totalAllowance = v; }
 
-	public BigDecimal getRemainingVehicleAllowance() {
-		return remainingVehicleAllowance;
-	}
+    public BigDecimal getRemainingAllowance() { return remainingAllowance; }
+    public void setRemainingAllowance(BigDecimal v) { this.remainingAllowance = v; }
 
-	public void setRemainingVehicleAllowance(BigDecimal remainingVehicleAllowance) {
-		this.remainingVehicleAllowance = remainingVehicleAllowance;
-	}
+    public BigDecimal getVehicleAllowance() { return vehicleAllowance; }
+    public void setVehicleAllowance(BigDecimal v) { this.vehicleAllowance = v; }
 
-	public boolean isClosed() {
-		return closed;
-	}
+    public BigDecimal getRemainingVehicleAllowance() { return remainingVehicleAllowance; }
+    public void setRemainingVehicleAllowance(BigDecimal v) { this.remainingVehicleAllowance = v; }
 
-	public void setClosed(boolean closed) {
-		this.closed = closed;
-	}
-	
-	
-
+    public boolean isClosed() { return closed; }
+    public void setClosed(boolean v) { this.closed = v; }
 }
