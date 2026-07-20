@@ -118,7 +118,10 @@ public class BudgetService {
         if (maniIsPaying && !maniOwes) {
             deductBalance(profile, expense);
             warning = deductAllowance(profile, budget,
-                      expense.getCategory(), expense.getAmount());
+                      expense.getCategory(), expense.getAmount(), expense);
+        } else {
+            // Nothing deducted now — set salaryDeducted to 0
+            expense.setSalaryDeducted(BigDecimal.ZERO);
         }
 
         profileRepository.save(profile);
@@ -131,11 +134,14 @@ public class BudgetService {
 
     public Expense settleExpense(Long id) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "Expense not found: " + id));
 
-        String paidByName = trim(expense.getPaidByName() != null ? expense.getPaidByName() :
+        String paidByName = trim(expense.getPaidByName() != null ?
+                expense.getPaidByName() :
                 (expense.getPaidBy() != null ? expense.getPaidBy().getName() : ""));
-        String owedByName = trim(expense.getOwedByName() != null ? expense.getOwedByName() :
+        String owedByName = trim(expense.getOwedByName() != null ?
+                expense.getOwedByName() :
                 (expense.getOwedBy() != null ? expense.getOwedBy().getName() : ""));
 
         boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
@@ -146,16 +152,22 @@ public class BudgetService {
             MonthlyBudget budget = getCurrentBudget();
 
             if (maniOwes) {
+                // Pay Back: Mani pays now → deduct balance + allowance
                 deductBalance(profile, expense);
-                deductAllowance(profile, budget, expense.getCategory(), expense.getAmount());
+                deductAllowance(profile, budget,
+                                expense.getCategory(), expense.getAmount(), expense);
             } else if (maniPaid) {
+                // Collect: someone pays Mani → add balance + refund allowance
                 addBalance(profile, expense);
-                refundAllowance(profile, budget, expense.getCategory(), expense.getAmount());
+                refundAllowance(profile, budget,
+                                expense.getCategory(), expense.getAmount(), expense);
             }
 
             profileRepository.save(profile);
             budgetRepository.save(budget);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            System.err.println("Error in settleExpense: " + e.getMessage());
+        }
 
         expense.setSettled(true);
         return expenseRepository.save(expense);
@@ -165,11 +177,14 @@ public class BudgetService {
 
     public void deleteExpense(Long id) {
         Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "Expense not found: " + id));
 
-        String paidByName = trim(expense.getPaidByName() != null ? expense.getPaidByName() :
+        String paidByName = trim(expense.getPaidByName() != null ?
+                expense.getPaidByName() :
                 (expense.getPaidBy() != null ? expense.getPaidBy().getName() : ""));
-        String owedByName = trim(expense.getOwedByName() != null ? expense.getOwedByName() :
+        String owedByName = trim(expense.getOwedByName() != null ?
+                expense.getOwedByName() :
                 (expense.getOwedBy() != null ? expense.getOwedBy().getName() : ""));
 
         boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
@@ -181,25 +196,28 @@ public class BudgetService {
 
             if (!expense.isSettled()) {
                 if (maniPaid && !maniOwes) {
-                    // Mani paid, not yet collected → refund
+                    // Was deducted when added → refund exactly
                     addBalance(profile, expense);
                     refundAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount());
+                                    expense.getCategory(), expense.getAmount(), expense);
                 }
-                // maniOwes + unsettled → nothing deducted yet → do nothing
+                // maniOwes + unsettled → nothing deducted → do nothing
             } else {
                 if (maniOwes) {
-                    // Mani paid back at settle → reverse that payback → refund
+                    // Mani paid back at settle → reverse: refund
                     addBalance(profile, expense);
                     refundAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount());
+                                    expense.getCategory(), expense.getAmount(), expense);
                 }
-                // maniPaid + settled (Collect) → already refunded at collect → do nothing
+                // maniPaid + settled (Collect) → balance restored at collect → do nothing
             }
 
             profileRepository.save(profile);
             budgetRepository.save(budget);
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            System.err.println("Error in deleteExpense: " + e.getMessage());
+        }
+
         expenseRepository.deleteById(id);
     }
 
@@ -221,7 +239,8 @@ public class BudgetService {
         profileRepository.save(profile);
         budgetRepository.save(budget);
 
-        return new EndOfMonthResult(aLeft, vLeft, sLeft, total, profile.getSavingsAmount());
+        return new EndOfMonthResult(aLeft, vLeft, sLeft, total,
+                                    profile.getSavingsAmount());
     }
 
     // ─── SUMMARY ──────────────────────────────────────────────
@@ -276,18 +295,23 @@ public class BudgetService {
         }
     }
 
-    private String deductAllowance(FinancialProfile profile, MonthlyBudget budget,
-                                    Category category, BigDecimal amount) {
+    private String deductAllowance(FinancialProfile profile,
+                                    MonthlyBudget budget,
+                                    Category category,
+                                    BigDecimal amount,
+                                    Expense expense) {
         String warning = null;
         if (category == Category.VEHICLE) {
             BigDecimal rem = budget.getRemainingVehicleAllowance();
             if (rem.compareTo(amount) >= 0) {
                 budget.setRemainingVehicleAllowance(rem.subtract(amount));
+                expense.setSalaryDeducted(BigDecimal.ZERO);
             } else {
                 BigDecimal overflow = amount.subtract(rem);
                 budget.setRemainingVehicleAllowance(BigDecimal.ZERO);
                 profile.setRemainingSalary(
                     profile.getRemainingSalary().subtract(overflow));
+                expense.setSalaryDeducted(overflow);
                 warning = "Vehicle allowance exhausted. ₹" + overflow +
                           " deducted from salary.";
             }
@@ -295,11 +319,13 @@ public class BudgetService {
             BigDecimal rem = budget.getRemainingAllowance();
             if (rem.compareTo(amount) >= 0) {
                 budget.setRemainingAllowance(rem.subtract(amount));
+                expense.setSalaryDeducted(BigDecimal.ZERO);
             } else {
                 BigDecimal overflow = amount.subtract(rem);
                 budget.setRemainingAllowance(BigDecimal.ZERO);
                 profile.setRemainingSalary(
                     profile.getRemainingSalary().subtract(overflow));
+                expense.setSalaryDeducted(overflow);
                 warning = "General allowance exhausted. ₹" + overflow +
                           " deducted from salary.";
             }
@@ -307,38 +333,28 @@ public class BudgetService {
         return warning;
     }
 
-    private void refundAllowance(FinancialProfile profile, MonthlyBudget budget,
-            Category category, BigDecimal amount) {
-if (category == Category.VEHICLE) {
-BigDecimal current = budget.getRemainingVehicleAllowance();
-BigDecimal max = budget.getVehicleAllowance();
-BigDecimal space = max.subtract(current); // how much room in allowance
+    private void refundAllowance(FinancialProfile profile,
+                                  MonthlyBudget budget,
+                                  Category category,
+                                  BigDecimal amount,
+                                  Expense expense) {
+        BigDecimal salaryPart = expense.getSalaryDeducted() != null ?
+                                expense.getSalaryDeducted() : BigDecimal.ZERO;
+        BigDecimal allowancePart = amount.subtract(salaryPart);
 
-if (amount.compareTo(space) <= 0) {
-// Entire refund fits in allowance
-budget.setRemainingVehicleAllowance(current.add(amount));
-} else {
-// Fill allowance to max, rest goes to salary
-budget.setRemainingVehicleAllowance(max);
-BigDecimal toSalary = amount.subtract(space);
-profile.setRemainingSalary(profile.getRemainingSalary().add(toSalary));
-}
-} else {
-BigDecimal current = budget.getRemainingAllowance();
-BigDecimal max = budget.getTotalAllowance();
-BigDecimal space = max.subtract(current); // how much room in allowance
+        if (category == Category.VEHICLE) {
+            budget.setRemainingVehicleAllowance(
+                budget.getRemainingVehicleAllowance().add(allowancePart));
+        } else {
+            budget.setRemainingAllowance(
+                budget.getRemainingAllowance().add(allowancePart));
+        }
 
-if (amount.compareTo(space) <= 0) {
-// Entire refund fits in allowance
-budget.setRemainingAllowance(current.add(amount));
-} else {
-// Fill allowance to max, rest goes to salary
-budget.setRemainingAllowance(max);
-BigDecimal toSalary = amount.subtract(space);
-profile.setRemainingSalary(profile.getRemainingSalary().add(toSalary));
-}
-}
-}
+        if (salaryPart.compareTo(BigDecimal.ZERO) > 0) {
+            profile.setRemainingSalary(
+                profile.getRemainingSalary().add(salaryPart));
+        }
+    }
 
     private String trim(String s) {
         return s != null ? s.trim() : "";

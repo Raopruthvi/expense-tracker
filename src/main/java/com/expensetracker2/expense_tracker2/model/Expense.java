@@ -40,6 +40,10 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Category cannot be null")
     private Category category;
+    
+    private BigDecimal salaryDeducted = BigDecimal.ZERO;
+
+   
 
     public Expense() {}
 
@@ -77,4 +81,7 @@ public class Expense {
 
     public Category getCategory() { return category; }
     public void setCategory(Category v) { this.category = v; }
+    
+    public BigDecimal getSalaryDeducted() { return salaryDeducted; }
+    public void setSalaryDeducted(BigDecimal v) { this.salaryDeducted = v; }
 }
