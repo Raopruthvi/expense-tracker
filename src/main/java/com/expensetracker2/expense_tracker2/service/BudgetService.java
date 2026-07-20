@@ -181,21 +181,14 @@ public class BudgetService {
 
             if (!expense.isSettled()) {
                 if (maniPaid && !maniOwes) {
+                    // Was deducted when added, never reversed → refund now
                     addBalance(profile, expense);
-                    refundAllowance(profile, budget, expense.getCategory(), expense.getAmount());
+                    refundAllowance(profile, budget,
+                                    expense.getCategory(), expense.getAmount());
                 }
-                // maniOwes + unsettled → nothing was deducted → nothing to reverse
-            } else {
-                if (maniOwes) {
-                    // Settled = maniPaid someone back → reverse: add back
-                    addBalance(profile, expense);
-                    refundAllowance(profile, budget, expense.getCategory(), expense.getAmount());
-                } else if (maniPaid) {
-                    // Settled = someone paid Mani → reverse: deduct back
-                    deductBalance(profile, expense);
-                    deductAllowance(profile, budget, expense.getCategory(), expense.getAmount());
-                }
+                // maniOwes + unsettled → nothing deducted yet → nothing to reverse
             }
+            // settled → balance was already restored at settle time → do nothing
 
             profileRepository.save(profile);
             budgetRepository.save(budget);
