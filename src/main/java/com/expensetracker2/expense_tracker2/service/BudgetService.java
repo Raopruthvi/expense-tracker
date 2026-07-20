@@ -199,7 +199,10 @@ public class BudgetService {
 
             profileRepository.save(profile);
             budgetRepository.save(budget);
-        } catch (Exception ignored) {}
+        }  catch (Exception e) {
+            System.err.println("ERROR in deleteExpense: " + e.getMessage());
+            e.printStackTrace();
+        }
         expenseRepository.deleteById(id);
     }
 
