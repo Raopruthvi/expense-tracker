@@ -42,6 +42,8 @@ public class Expense {
     private Category category;
     
     private BigDecimal salaryDeducted = BigDecimal.ZERO;
+    
+    private boolean fromSavings;
 
    
 
@@ -84,4 +86,7 @@ public class Expense {
     
     public BigDecimal getSalaryDeducted() { return salaryDeducted; }
     public void setSalaryDeducted(BigDecimal v) { this.salaryDeducted = v; }
+    
+    public boolean isFromSavings() { return fromSavings; }
+    public void setFromSavings(boolean v) { this.fromSavings = v; }
 }

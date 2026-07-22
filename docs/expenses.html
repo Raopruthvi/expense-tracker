@@ -59,6 +59,10 @@
                     <input id="isCash" type="checkbox" style="width:18px;height:18px;accent-color:#667eea;">
                     <span style="font-size:14px;color:#374151;font-weight:500;">💵 Paid by Cash</span>
                 </label>
+				<label style="display:flex;align-items:center;gap:10px;padding:12px;background:#f0fdf4;border-radius:10px;cursor:pointer;">
+				    <input id="fromSavings" type="checkbox" style="width:18px;height:18px;accent-color:#16a34a;">
+				    <span style="font-size:14px;color:#374151;font-weight:500;">💰 Pay from Savings</span>
+				</label>
 
                 <div id="warningBox" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;font-size:13px;color:#92400e;"></div>
 
@@ -107,6 +111,9 @@
             const paidByName = document.getElementById('paidByName').value.trim();
             const owedByName = document.getElementById('owedByName').value.trim();
             const isCash = document.getElementById('isCash').checked;
+			const fromSavings = document.getElementById('fromSavings').checked;
+			data.fromSavings = fromSavings;
+			document.getElementById('fromSavings').checked = false;
 
             if (!description || !amount || !category || !spendingDate) {
                 alert('Please fill description, amount, category and spending date.');
@@ -195,6 +202,7 @@
                                 <span style="font-size:14px;font-weight:700;color:#1f2937;">${e.description}</span>
                                 <span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:${catBg};color:${catColor};">${e.category.replace('_',' ')}</span>
                                 ${e.cash ? '<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef9c3;color:#a16207;">💵 CASH</span>' : ''}
+								${e.fromSavings ? '<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">💰 Savings</span>' : ''}
                             </div>
                             <p style="font-size:24px;font-weight:800;color:#667eea;margin:4px 0;">₹${fmt(e.amount)}</p>
                             ${e.settled ? '<span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">✅ Settled</span>' :

@@ -116,11 +116,19 @@ public class BudgetService {
         boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
 
         if (maniIsPaying && !maniOwes) {
-            deductBalance(profile, expense);
-            warning = deductAllowance(profile, budget,
-                      expense.getCategory(), expense.getAmount(), expense);
+            if (expense.isFromSavings()) {
+                // Deduct from savings + bank balance
+                profile.setSavingsAmount(
+                    profile.getSavingsAmount().subtract(expense.getAmount()));
+                profile.setAccountBalance(
+                    profile.getAccountBalance().subtract(expense.getAmount()));
+                expense.setSalaryDeducted(BigDecimal.ZERO);
+            } else {
+                deductBalance(profile, expense);
+                warning = deductAllowance(profile, budget,
+                          expense.getCategory(), expense.getAmount(), expense);
+            }
         } else {
-            // Nothing deducted now — set salaryDeducted to 0
             expense.setSalaryDeducted(BigDecimal.ZERO);
         }
 
@@ -152,17 +160,28 @@ public class BudgetService {
             MonthlyBudget budget = getCurrentBudget();
 
             if (maniOwes) {
-                // Pay Back: Mani pays now → deduct balance + allowance
-                deductBalance(profile, expense);
-                deductAllowance(profile, budget,
-                                expense.getCategory(), expense.getAmount(), expense);
+                if (expense.isFromSavings()) {
+                    profile.setSavingsAmount(
+                        profile.getSavingsAmount().subtract(expense.getAmount()));
+                    profile.setAccountBalance(
+                        profile.getAccountBalance().subtract(expense.getAmount()));
+                } else {
+                    deductBalance(profile, expense);
+                    deductAllowance(profile, budget,
+                                    expense.getCategory(), expense.getAmount(), expense);
+                }
             } else if (maniPaid) {
-                // Collect: someone pays Mani → add balance + refund allowance
-                addBalance(profile, expense);
-                refundAllowance(profile, budget,
-                                expense.getCategory(), expense.getAmount(), expense);
+                if (expense.isFromSavings()) {
+                    profile.setSavingsAmount(
+                        profile.getSavingsAmount().add(expense.getAmount()));
+                    profile.setAccountBalance(
+                        profile.getAccountBalance().add(expense.getAmount()));
+                } else {
+                    addBalance(profile, expense);
+                    refundAllowance(profile, budget,
+                                    expense.getCategory(), expense.getAmount(), expense);
+                }
             }
-
             profileRepository.save(profile);
             budgetRepository.save(budget);
         } catch (Exception e) {
@@ -196,20 +215,32 @@ public class BudgetService {
 
             if (!expense.isSettled()) {
                 if (maniPaid && !maniOwes) {
-                    // Was deducted when added → refund exactly
-                    addBalance(profile, expense);
-                    refundAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount(), expense);
+                    if (expense.isFromSavings()) {
+                        profile.setSavingsAmount(
+                            profile.getSavingsAmount().add(expense.getAmount()));
+                        profile.setAccountBalance(
+                            profile.getAccountBalance().add(expense.getAmount()));
+                    } else {
+                        addBalance(profile, expense);
+                        refundAllowance(profile, budget,
+                                        expense.getCategory(), expense.getAmount(), expense);
+                    }
                 }
                 // maniOwes + unsettled → nothing deducted → do nothing
             } else {
                 if (maniOwes) {
-                    // Mani paid back at settle → reverse: refund
-                    addBalance(profile, expense);
-                    refundAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount(), expense);
+                    if (expense.isFromSavings()) {
+                        profile.setSavingsAmount(
+                            profile.getSavingsAmount().add(expense.getAmount()));
+                        profile.setAccountBalance(
+                            profile.getAccountBalance().add(expense.getAmount()));
+                    } else {
+                        addBalance(profile, expense);
+                        refundAllowance(profile, budget,
+                                        expense.getCategory(), expense.getAmount(), expense);
+                    }
                 }
-                // maniPaid + settled (Collect) → balance restored at collect → do nothing
+                // maniPaid + settled Collect → do nothing
             }
 
             profileRepository.save(profile);
