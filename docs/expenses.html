@@ -111,16 +111,14 @@
             const paidByName = document.getElementById('paidByName').value.trim();
             const owedByName = document.getElementById('owedByName').value.trim();
             const isCash = document.getElementById('isCash').checked;
-			const fromSavings = document.getElementById('fromSavings').checked;
-			data.fromSavings = fromSavings;
-			document.getElementById('fromSavings').checked = false;
+            const fromSavings = document.getElementById('fromSavings').checked;
 
             if (!description || !amount || !category || !spendingDate) {
                 alert('Please fill description, amount, category and spending date.');
                 return;
             }
 
-            const data = { description, amount: parseFloat(amount), category, spendingDate, settled: false, cash: isCash };
+            const data = { description, amount: parseFloat(amount), category, spendingDate, settled: false, cash: isCash, fromSavings };
             if (deadline) data.deadline = deadline;
             if (paidByName) data.paidByName = paidByName;
             if (owedByName) data.owedByName = owedByName;
@@ -145,6 +143,7 @@
                 document.getElementById('category').value = '';
                 document.getElementById('spendingDate').value = '';
                 document.getElementById('isCash').checked = false;
+                document.getElementById('fromSavings').checked = false;
                 loadExpenses('all');
             } catch(e) { alert('Network error: ' + e.message); }
         }
