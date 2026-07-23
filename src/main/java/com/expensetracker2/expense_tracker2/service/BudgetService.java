@@ -71,7 +71,8 @@ public class BudgetService {
         budgetRepository.findByMonthAndYearAndClosedFalse(m, y).ifPresent(b -> {
             throw new IllegalArgumentException("Budget for this month already exists.");
         });
-        return budgetRepository.save(new MonthlyBudget(m, y, totalAllowance, vehicleAllowance));
+        return budgetRepository.save(
+            new MonthlyBudget(m, y, totalAllowance, vehicleAllowance));
     }
 
     public MonthlyBudget getCurrentBudget() {
@@ -93,7 +94,8 @@ public class BudgetService {
         if (vehicleAllowance != null) {
             BigDecimal diff = vehicleAllowance.subtract(b.getVehicleAllowance());
             b.setVehicleAllowance(vehicleAllowance);
-            b.setRemainingVehicleAllowance(b.getRemainingVehicleAllowance().add(diff));
+            b.setRemainingVehicleAllowance(
+                b.getRemainingVehicleAllowance().add(diff));
         }
         return budgetRepository.save(b);
     }
@@ -117,7 +119,6 @@ public class BudgetService {
 
         if (maniIsPaying && !maniOwes) {
             if (expense.isFromSavings()) {
-                // Deduct from savings + bank balance
                 profile.setSavingsAmount(
                     profile.getSavingsAmount().subtract(expense.getAmount()));
                 profile.setAccountBalance(
@@ -147,13 +148,16 @@ public class BudgetService {
 
         String paidByName = trim(expense.getPaidByName() != null ?
                 expense.getPaidByName() :
-                (expense.getPaidBy() != null ? expense.getPaidBy().getName() : ""));
+                (expense.getPaidBy() != null ?
+                 expense.getPaidBy().getName() : ""));
         String owedByName = trim(expense.getOwedByName() != null ?
                 expense.getOwedByName() :
-                (expense.getOwedBy() != null ? expense.getOwedBy().getName() : ""));
+                (expense.getOwedBy() != null ?
+                 expense.getOwedBy().getName() : ""));
 
         boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
-        boolean maniPaid = paidByName.isEmpty() || paidByName.equalsIgnoreCase(OWNER);
+        boolean maniPaid = paidByName.isEmpty() ||
+                           paidByName.equalsIgnoreCase(OWNER);
 
         try {
             FinancialProfile profile = getProfile();
@@ -168,7 +172,8 @@ public class BudgetService {
                 } else {
                     deductBalance(profile, expense);
                     deductAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount(), expense);
+                                    expense.getCategory(),
+                                    expense.getAmount(), expense);
                 }
             } else if (maniPaid) {
                 if (expense.isFromSavings()) {
@@ -179,9 +184,11 @@ public class BudgetService {
                 } else {
                     addBalance(profile, expense);
                     refundAllowance(profile, budget,
-                                    expense.getCategory(), expense.getAmount(), expense);
+                                    expense.getCategory(),
+                                    expense.getAmount(), expense);
                 }
             }
+
             profileRepository.save(profile);
             budgetRepository.save(budget);
         } catch (Exception e) {
@@ -201,13 +208,16 @@ public class BudgetService {
 
         String paidByName = trim(expense.getPaidByName() != null ?
                 expense.getPaidByName() :
-                (expense.getPaidBy() != null ? expense.getPaidBy().getName() : ""));
+                (expense.getPaidBy() != null ?
+                 expense.getPaidBy().getName() : ""));
         String owedByName = trim(expense.getOwedByName() != null ?
                 expense.getOwedByName() :
-                (expense.getOwedBy() != null ? expense.getOwedBy().getName() : ""));
+                (expense.getOwedBy() != null ?
+                 expense.getOwedBy().getName() : ""));
 
         boolean maniOwes = owedByName.equalsIgnoreCase(OWNER);
-        boolean maniPaid = paidByName.isEmpty() || paidByName.equalsIgnoreCase(OWNER);
+        boolean maniPaid = paidByName.isEmpty() ||
+                           paidByName.equalsIgnoreCase(OWNER);
 
         try {
             FinancialProfile profile = getProfile();
@@ -223,7 +233,8 @@ public class BudgetService {
                     } else {
                         addBalance(profile, expense);
                         refundAllowance(profile, budget,
-                                        expense.getCategory(), expense.getAmount(), expense);
+                                        expense.getCategory(),
+                                        expense.getAmount(), expense);
                     }
                 }
                 // maniOwes + unsettled → nothing deducted → do nothing
@@ -237,7 +248,8 @@ public class BudgetService {
                     } else {
                         addBalance(profile, expense);
                         refundAllowance(profile, budget,
-                                        expense.getCategory(), expense.getAmount(), expense);
+                                        expense.getCategory(),
+                                        expense.getAmount(), expense);
                     }
                 }
                 // maniPaid + settled Collect → do nothing

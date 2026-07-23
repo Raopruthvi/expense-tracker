@@ -7,30 +7,33 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f0f4f8; }
-        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); }
-        .input { width:100%; border:1.5px solid #e5e7eb; border-radius:10px; padding:12px; font-size:14px; outline:none; transition:border 0.2s; }
+        .card { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.08); margin-bottom:16px; }
+        .input { width:100%; border:1.5px solid #e5e7eb; border-radius:10px; padding:12px; font-size:14px; outline:none; transition:border 0.2s; box-sizing:border-box; }
         .input:focus { border-color:#667eea; }
         .btn-primary { width:100%; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:10px; padding:14px; font-size:15px; font-weight:600; cursor:pointer; }
-        .chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:99px; font-size:11px; font-weight:600; }
-        .tag { display:inline-block; padding:2px 8px; border-radius:6px; font-size:11px; background:#ede9fe; color:#7c3aed; font-weight:500; }
+        .filter-btn { flex:1; padding:10px; border-radius:10px; font-size:13px; font-weight:500; cursor:pointer; border:1.5px solid #e5e7eb; background:white; color:#6b7280; }
+        .filter-btn.active { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; font-weight:600; }
+        .toggle-label { display:flex; align-items:center; gap:10px; padding:12px; border-radius:10px; cursor:pointer; }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div style="background:linear-gradient(135deg,#667eea,#764ba2); color:white; padding:48px 20px 20px;">
+
+    <div style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;padding:48px 20px 20px;">
         <h1 style="font-size:22px;font-weight:700;">Expenses</h1>
     </div>
 
-    <div style="padding:16px; padding-bottom:100px; max-width:480px; margin:0 auto;">
+    <div style="padding:16px;padding-bottom:100px;max-width:480px;margin:0 auto;">
 
         <!-- Add Expense Form -->
-        <div class="card" style="margin-bottom:16px;">
+        <div class="card">
             <h2 style="font-size:16px;font-weight:700;color:#1f2937;margin-bottom:16px;">Add Expense</h2>
             <div style="display:flex;flex-direction:column;gap:10px;">
-                <input id="description" class="input" type="text" placeholder="What did you spend on? *">
-                <input id="amount" class="input" type="number" step="0.01" placeholder="Amount ₹ *">
 
-                <select id="category" class="input" style="appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%236b7280%22><path stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%222%22 d=%22M19 9l-7 7-7-7%22/></svg>');background-repeat:no-repeat;background-position:right 12px center;background-size:16px;padding-right:40px;">
+                <input id="description" class="input" type="text" placeholder="What did you spend on? *">
+
+                <input id="amount" class="input" type="number" step="0.01" min="0.01" placeholder="Amount ₹ *">
+
+                <select id="category" class="input" style="background:white;">
                     <option value="">Select Category *</option>
                     <option value="FOOD">🍽 Food</option>
                     <option value="SPORTS">⚽ Sports</option>
@@ -55,14 +58,17 @@
                 <input id="paidByName" class="input" type="text" placeholder="Paid by (optional, default: Mani)">
                 <input id="owedByName" class="input" type="text" placeholder="Owed by (optional)">
 
-                <label style="display:flex;align-items:center;gap:10px;padding:12px;background:#f9fafb;border-radius:10px;cursor:pointer;">
-                    <input id="isCash" type="checkbox" style="width:18px;height:18px;accent-color:#667eea;">
-                    <span style="font-size:14px;color:#374151;font-weight:500;">💵 Paid by Cash</span>
-                </label>
-				<label style="display:flex;align-items:center;gap:10px;padding:12px;background:#f0fdf4;border-radius:10px;cursor:pointer;">
-				    <input id="fromSavings" type="checkbox" style="width:18px;height:18px;accent-color:#16a34a;">
-				    <span style="font-size:14px;color:#374151;font-weight:500;">💰 Pay from Savings</span>
-				</label>
+                <!-- Payment method toggles -->
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <label class="toggle-label" style="background:#fef9c3;" onclick="handleToggle('isCash')">
+                        <input id="isCash" type="checkbox" style="width:18px;height:18px;accent-color:#d97706;" onchange="handleToggle('isCash')">
+                        <span style="font-size:14px;color:#374151;font-weight:500;">💵 Paid by Cash</span>
+                    </label>
+                    <label class="toggle-label" style="background:#f0fdf4;" onclick="handleToggle('fromSavings')">
+                        <input id="fromSavings" type="checkbox" style="width:18px;height:18px;accent-color:#16a34a;" onchange="handleToggle('fromSavings')">
+                        <span style="font-size:14px;color:#374151;font-weight:500;">💰 Pay from Savings</span>
+                    </label>
+                </div>
 
                 <div id="warningBox" style="display:none;background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px;font-size:13px;color:#92400e;"></div>
 
@@ -71,14 +77,11 @@
         </div>
 
         <!-- Filters -->
-        <div class="card" style="margin-bottom:16px;">
+        <div class="card">
             <div style="display:flex;gap:8px;">
-                <button id="btn-all" onclick="loadExpenses('all')"
-                    style="flex:1;padding:10px;border-radius:10px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);color:white;font-size:13px;font-weight:600;cursor:pointer;">All</button>
-                <button id="btn-unsettled" onclick="loadExpenses('unsettled')"
-                    style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#6b7280;font-size:13px;font-weight:500;cursor:pointer;">Unsettled</button>
-                <button id="btn-overdue" onclick="loadExpenses('overdue')"
-                    style="flex:1;padding:10px;border-radius:10px;border:1.5px solid #e5e7eb;background:white;color:#6b7280;font-size:13px;font-weight:500;cursor:pointer;">Overdue</button>
+                <button id="btn-all" class="filter-btn active" onclick="loadExpenses('all')">All</button>
+                <button id="btn-unsettled" class="filter-btn" onclick="loadExpenses('unsettled')">Unsettled</button>
+                <button id="btn-overdue" class="filter-btn" onclick="loadExpenses('overdue')">Overdue</button>
             </div>
         </div>
 
@@ -86,7 +89,7 @@
     </div>
 
     <!-- Bottom Nav -->
-    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;">
+    <div style="position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e5e7eb;padding:12px 0;display:flex;justify-content:space-around;align-items:center;z-index:10;">
         <a href="index.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">🏠</span>Home</a>
         <a href="expenses.html" style="display:flex;flex-direction:column;align-items:center;color:#667eea;text-decoration:none;font-size:11px;font-weight:600;"><span style="font-size:22px">💸</span>Expenses</a>
         <a href="people.html" style="display:flex;flex-direction:column;align-items:center;color:#9ca3af;text-decoration:none;font-size:11px;"><span style="font-size:22px">👥</span>People</a>
@@ -99,7 +102,19 @@
         const OWNER = 'mani';
 
         function fmt(v) {
-            return parseFloat(v).toLocaleString('en-IN', {minimumFractionDigits:2,maximumFractionDigits:2});
+            return parseFloat(v).toLocaleString('en-IN', {
+                minimumFractionDigits: 2, maximumFractionDigits: 2
+            });
+        }
+
+        // Only one payment method can be active at a time
+        function handleToggle(changed) {
+            if (changed === 'isCash' && document.getElementById('isCash').checked) {
+                document.getElementById('fromSavings').checked = false;
+            }
+            if (changed === 'fromSavings' && document.getElementById('fromSavings').checked) {
+                document.getElementById('isCash').checked = false;
+            }
         }
 
         async function addExpense() {
@@ -113,23 +128,38 @@
             const isCash = document.getElementById('isCash').checked;
             const fromSavings = document.getElementById('fromSavings').checked;
 
-            if (!description || !amount || !category || !spendingDate) {
-                alert('Please fill description, amount, category and spending date.');
-                return;
-            }
+            if (!description) { alert('Please enter a description.'); return; }
+            if (!amount || parseFloat(amount) <= 0) { alert('Please enter a valid amount.'); return; }
+            if (!category) { alert('Please select a category.'); return; }
+            if (!spendingDate) { alert('Please enter the date of spending.'); return; }
 
-            const data = { description, amount: parseFloat(amount), category, spendingDate, settled: false, cash: isCash, fromSavings };
+            const data = {
+                description,
+                amount: parseFloat(amount),
+                category,
+                spendingDate,
+                settled: false,
+                cash: isCash,
+                fromSavings: fromSavings
+            };
+
             if (deadline) data.deadline = deadline;
             if (paidByName) data.paidByName = paidByName;
             if (owedByName) data.owedByName = owedByName;
 
             try {
                 const res = await fetch(`${API}/api/budget/expense`, {
-                    method:'POST', headers:{'Content-Type':'application/json'},
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
+
                 const result = await res.json();
-                if (!res.ok) { alert(result.message || 'Error adding expense'); return; }
+
+                if (!res.ok) {
+                    alert('Error: ' + (result.message || 'Failed to add expense'));
+                    return;
+                }
 
                 if (result.warning) {
                     const wb = document.getElementById('warningBox');
@@ -139,52 +169,62 @@
                     document.getElementById('warningBox').style.display = 'none';
                 }
 
-                ['description','amount','deadline','paidByName','owedByName'].forEach(id => document.getElementById(id).value = '');
+                // Clear all fields
+                document.getElementById('description').value = '';
+                document.getElementById('amount').value = '';
                 document.getElementById('category').value = '';
                 document.getElementById('spendingDate').value = '';
+                document.getElementById('deadline').value = '';
+                document.getElementById('paidByName').value = '';
+                document.getElementById('owedByName').value = '';
                 document.getElementById('isCash').checked = false;
                 document.getElementById('fromSavings').checked = false;
+
                 loadExpenses('all');
-            } catch(e) { alert('Network error: ' + e.message); }
+
+            } catch (e) {
+                alert('Network error: ' + e.message);
+            }
         }
 
         async function loadExpenses(filter = 'all') {
-            ['all','unsettled','overdue'].forEach(f => {
+            // Update filter buttons
+            ['all', 'unsettled', 'overdue'].forEach(f => {
                 const btn = document.getElementById('btn-' + f);
-                if (f === filter) {
-                    btn.style.background = 'linear-gradient(135deg,#667eea,#764ba2)';
-                    btn.style.color = 'white';
-                    btn.style.border = 'none';
-                    btn.style.fontWeight = '600';
-                } else {
-                    btn.style.background = 'white';
-                    btn.style.color = '#6b7280';
-                    btn.style.border = '1.5px solid #e5e7eb';
-                    btn.style.fontWeight = '500';
-                }
+                btn.className = 'filter-btn' + (f === filter ? ' active' : '');
             });
 
             const res = await fetch(`${API}/api/expenses`);
             let expenses = await res.json();
-            const today = new Date(); today.setHours(0,0,0,0);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             if (filter === 'unsettled') {
-                expenses = expenses.filter(e => !e.settled && e.deadline && (e.owedBy || e.owedByName));
+                expenses = expenses.filter(e =>
+                    !e.settled && e.deadline && (e.owedBy || e.owedByName));
             } else if (filter === 'overdue') {
-                expenses = expenses.filter(e => !e.settled && e.deadline && new Date(e.deadline) < today);
+                expenses = expenses.filter(e =>
+                    !e.settled && e.deadline && new Date(e.deadline) < today);
             }
 
             const list = document.getElementById('expenseList');
+
             if (!expenses.length) {
-                list.innerHTML = '<div class="card" style="text-align:center;color:#9ca3af;padding:32px;">No expenses found</div>';
+                list.innerHTML = `<div class="card" style="text-align:center;color:#9ca3af;padding:32px;">
+                    No expenses found</div>`;
                 return;
             }
 
             const catColors = {
-                FOOD:'#fef3c7|#d97706', SPORTS:'#dcfce7|#16a34a', VEHICLE:'#ffedd5|#ea580c',
-                TRIP:'#dbeafe|#2563eb', ONLINE_SHOPPING:'#ede9fe|#7c3aed',
-                SUBSCRIPTIONS:'#fce7f3|#db2777', MISCELLANEOUS:'#f3f4f6|#6b7280',
-                GENERAL:'#e0f2fe|#0284c7'
+                FOOD: ['#fef3c7','#d97706'],
+                SPORTS: ['#dcfce7','#16a34a'],
+                VEHICLE: ['#ffedd5','#ea580c'],
+                TRIP: ['#dbeafe','#2563eb'],
+                ONLINE_SHOPPING: ['#ede9fe','#7c3aed'],
+                SUBSCRIPTIONS: ['#fce7f3','#db2777'],
+                MISCELLANEOUS: ['#f3f4f6','#6b7280'],
+                GENERAL: ['#e0f2fe','#0284c7']
             };
 
             list.innerHTML = expenses.map(e => {
@@ -192,33 +232,46 @@
                 const paidName = e.paidBy ? e.paidBy.name : (e.paidByName || '');
                 const hasSettlement = e.deadline && (e.owedBy || e.owedByName);
                 const maniOwes = owedName.toLowerCase() === OWNER;
-                const [catBg, catColor] = (catColors[e.category] || '#f3f4f6|#6b7280').split('|');
+                const [catBg, catColor] = catColors[e.category] || ['#f3f4f6','#6b7280'];
 
-                return `<div class="card" style="margin-bottom:12px;">
+                return `
+                <div class="card">
                     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
                         <div style="flex:1;min-width:0;">
-                            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
-                                <span style="font-size:14px;font-weight:700;color:#1f2937;">${e.description}</span>
-                                <span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:${catBg};color:${catColor};">${e.category.replace('_',' ')}</span>
-                                ${e.cash ? '<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef9c3;color:#a16207;">💵 CASH</span>' : ''}
-								${e.fromSavings ? '<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">💰 Savings</span>' : ''}
+                            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+                                <span style="font-size:15px;font-weight:700;color:#1f2937;">${e.description}</span>
                             </div>
                             <p style="font-size:24px;font-weight:800;color:#667eea;margin:4px 0;">₹${fmt(e.amount)}</p>
-                            ${e.settled ? '<span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">✅ Settled</span>' :
-                              hasSettlement ? '<span style="padding:3px 10px;border-radius:6px;font-size:11px;font-weight:600;background:#fee2e2;color:#dc2626;">⏳ Pending</span>' : ''}
-                            <div style="margin-top:8px;font-size:12px;color:#6b7280;line-height:1.8;">
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                                <span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:${catBg};color:${catColor};">
+                                    ${e.category.replace('_', ' ')}
+                                </span>
+                                ${e.cash ? `<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef9c3;color:#a16207;">💵 Cash</span>` : ''}
+                                ${e.fromSavings ? `<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#15803d;">💰 Savings</span>` : ''}
+                                ${e.settled
+                                    ? `<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#16a34a;">✅ Settled</span>`
+                                    : hasSettlement
+                                    ? `<span style="padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fee2e2;color:#dc2626;">⏳ Pending</span>`
+                                    : ''}
+                            </div>
+                            <div style="margin-top:8px;font-size:12px;color:#6b7280;line-height:2;">
                                 ${paidName ? `<div>Paid by: <b>${paidName}</b></div>` : ''}
                                 ${owedName ? `<div>Owed by: <b>${owedName}</b></div>` : ''}
                                 ${e.spendingDate ? `<div>Spent: ${e.spendingDate}</div>` : ''}
                                 ${e.deadline ? `<div>Due: ${e.deadline}</div>` : ''}
                             </div>
                         </div>
-                        <div style="display:flex;flex-direction:column;gap:8px;min-width:72px;">
+                        <div style="display:flex;flex-direction:column;gap:8px;min-width:76px;">
                             ${!e.settled && hasSettlement ? `
-                            <button onclick="settle(${e.id})" style="padding:8px 12px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;background:${maniOwes ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#22c55e,#16a34a)'};color:white;">
-                                ${maniOwes ? '💸 Pay' : '✅ Collect'}
-                            </button>` : ''}
-                            <button onclick="del(${e.id})" style="padding:8px 12px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:#fee2e2;color:#dc2626;">Delete</button>
+                                <button onclick="settle(${e.id})"
+                                    style="padding:8px 10px;border-radius:8px;border:none;font-size:12px;font-weight:700;cursor:pointer;
+                                    background:${maniOwes ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,#22c55e,#16a34a)'};color:white;">
+                                    ${maniOwes ? '💸 Pay' : '✅ Collect'}
+                                </button>` : ''}
+                            <button onclick="del(${e.id})"
+                                style="padding:8px 10px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:#fee2e2;color:#dc2626;">
+                                Delete
+                            </button>
                         </div>
                     </div>
                 </div>`;
@@ -226,17 +279,24 @@
         }
 
         async function settle(id) {
-            const res = await fetch(`${API}/api/budget/expense/${id}/settle`, {method:'PUT'});
-            if (!res.ok) { const e = await res.json(); alert(e.message || 'Error settling'); return; }
+            const res = await fetch(`${API}/api/budget/expense/${id}/settle`, {
+                method: 'PUT'
+            });
+            if (!res.ok) {
+                const e = await res.json();
+                alert(e.message || 'Error settling expense');
+                return;
+            }
             loadExpenses('all');
         }
 
         async function del(id) {
             if (!confirm('Delete this expense? All financial changes will be reversed.')) return;
-            await fetch(`${API}/api/budget/expense/${id}`, {method:'DELETE'});
+            await fetch(`${API}/api/budget/expense/${id}`, { method: 'DELETE' });
             loadExpenses('all');
         }
 
+        // Load expenses on page start
         loadExpenses('all');
     </script>
 </body>
