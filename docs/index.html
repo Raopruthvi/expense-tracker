@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpendSmart</title>
     <script src="https://cdn.tailwindcss.com"></script>
+	<link rel="manifest" href="manifest.json">
+	<meta name="theme-color" content="#667eea">
     <style>
         .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
         .gradient-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
@@ -167,5 +169,12 @@
 
         load();
     </script>
+	<script>
+	    if ('serviceWorker' in navigator) {
+	        navigator.serviceWorker.register('/expense-tracker/sw.js')
+	            .then(() => console.log('SW registered'))
+	            .catch(e => console.log('SW error:', e));
+	    }
+	</script>
 </body>
 </html>
