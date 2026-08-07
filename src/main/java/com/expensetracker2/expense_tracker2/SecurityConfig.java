@@ -34,6 +34,6 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
             );
 
-        return http;
+        return http.build();
     }
 }
