@@ -64,6 +64,17 @@
     <script>
         const API = 'https://expense-tracker-ajf3.onrender.com';
 
+        function apiFetch(url, options = {}) {
+            options.credentials = 'include';
+            return fetch(url, options).then(res => {
+                if (res.status === 401) {
+                    window.location.href = `${API}/oauth2/authorization/google`;
+                    throw new Error('Not authenticated — redirecting to login');
+                }
+                return res;
+            });
+        }
+
         function fmt(v) {
             return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
         }
@@ -72,8 +83,8 @@
             const card = document.getElementById('summaryCard');
             try {
                 const [sr, br] = await Promise.all([
-                    fetch(`${API}/api/budget/summary`),
-                    fetch(`${API}/api/budget/monthly/current`)
+                    apiFetch(`${API}/api/budget/summary`),
+                    apiFetch(`${API}/api/budget/monthly/current`)
                 ]);
                 if (!sr.ok || !br.ok) {
                     card.innerHTML = '<p style="color:#9ca3af;font-size:14px;">No active profile or budget found.</p>';
@@ -108,7 +119,7 @@
         async function closeMonth() {
             if (!confirm('Close this month? All remaining allowances and salary move to savings.')) return;
             try {
-                const res = await fetch(`${API}/api/budget/month-end`, {method:'POST'});
+                const res = await apiFetch(`${API}/api/budget/month-end`, {method:'POST'});
                 if (!res.ok) { const e = await res.json(); alert(e.message || 'Error'); return; }
                 const d = await res.json();
                 const rc = document.getElementById('resultCard');
@@ -136,7 +147,7 @@
         async function resetAll() {
             if (!confirm('⚠️ DELETE EVERYTHING — all expenses, people, profile and budget?')) return;
             if (!confirm('Last chance. This cannot be undone. Confirm reset?')) return;
-            const res = await fetch(`${API}/api/budget/reset`, {method:'DELETE'});
+            const res = await apiFetch(`${API}/api/budget/reset`, {method:'DELETE'});
             if (res.ok) { alert('App reset complete.'); window.location.href = 'budget.html'; }
             else alert('Error resetting app');
         }

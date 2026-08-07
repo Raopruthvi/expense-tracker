@@ -72,6 +72,17 @@
     <script>
        const API = 'https://expense-tracker-ajf3.onrender.com';
 
+        function apiFetch(url, options = {}) {
+            options.credentials = 'include';
+            return fetch(url, options).then(res => {
+                if (res.status === 401) {
+                    window.location.href = `${API}/oauth2/authorization/google`;
+                    throw new Error('Not authenticated — redirecting to login');
+                }
+                return res;
+            });
+        }
+
         function fmt(v) {
             return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
         }
@@ -80,8 +91,8 @@
             const card = document.getElementById('statusCard');
             try {
                 const [sr, br] = await Promise.all([
-                    fetch(`${API}/api/budget/summary`),
-                    fetch(`${API}/api/budget/monthly/current`)
+                    apiFetch(`${API}/api/budget/summary`),
+                    apiFetch(`${API}/api/budget/monthly/current`)
                 ]);
                 if (!sr.ok) { card.innerHTML = '<p style="color:#9ca3af;font-size:14px;">No profile yet. Set one up below.</p>'; return; }
                 const d = await sr.json();
@@ -139,11 +150,11 @@
             const s = document.getElementById('salaryAmount').value;
             const sav = document.getElementById('savingsAmount').value;
 
-            const checkRes = await fetch(`${API}/api/budget/profile`);
+            const checkRes = await apiFetch(`${API}/api/budget/profile`);
 
             if (!checkRes.ok) {
                 if (!a || !c || !s) { alert('Bank balance, cash balance and salary are required for first setup.'); return; }
-                const res = await fetch(`${API}/api/budget/profile/setup`, {
+                const res = await apiFetch(`${API}/api/budget/profile/setup`, {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({
                         accountBalance: parseFloat(a), cashBalance: parseFloat(c),
@@ -159,7 +170,7 @@
                 if (s) body.salaryAmount = parseFloat(s);
                 if (sav) body.savingsAmount = parseFloat(sav);
                 if (!Object.keys(body).length) { alert('Fill at least one field to update.'); return; }
-                const res = await fetch(`${API}/api/budget/profile/update`, {
+                const res = await apiFetch(`${API}/api/budget/profile/update`, {
                     method:'PUT', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify(body)
                 });
@@ -173,17 +184,17 @@
             const v = document.getElementById('vehicleAllowance').value;
             if (!t || !v) { alert('Fill both allowance fields.'); return; }
 
-            const checkRes = await fetch(`${API}/api/budget/monthly/current`);
+            const checkRes = await apiFetch(`${API}/api/budget/monthly/current`);
 
             if (!checkRes.ok) {
-                const res = await fetch(`${API}/api/budget/monthly`, {
+                const res = await apiFetch(`${API}/api/budget/monthly`, {
                     method:'POST', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({totalAllowance: parseFloat(t), vehicleAllowance: parseFloat(v)})
                 });
                 if (res.ok) { alert('Budget created!'); clearBudget(); loadStatus(); }
                 else { const e = await res.json(); alert(e.message || 'Error'); }
             } else {
-                const res = await fetch(`${API}/api/budget/monthly/update`, {
+                const res = await apiFetch(`${API}/api/budget/monthly/update`, {
                     method:'PUT', headers:{'Content-Type':'application/json'},
                     body: JSON.stringify({totalAllowance: parseFloat(t), vehicleAllowance: parseFloat(v)})
                 });
@@ -194,14 +205,14 @@
 
         async function resetProfile() {
             if (!confirm('Reset financial profile? Expenses and people will be kept.')) return;
-            const res = await fetch(`${API}/api/budget/profile/reset`, {method:'DELETE'});
+            const res = await apiFetch(`${API}/api/budget/profile/reset`, {method:'DELETE'});
             if (res.ok) { alert('Profile reset.'); clearProfile(); loadStatus(); }
             else alert('Error resetting profile');
         }
 
         async function resetBudget() {
             if (!confirm('Reset this month\'s budget?')) return;
-            const res = await fetch(`${API}/api/budget/monthly/reset`, {method:'DELETE'});
+            const res = await apiFetch(`${API}/api/budget/monthly/reset`, {method:'DELETE'});
             if (res.ok) { alert('Budget reset.'); clearBudget(); loadStatus(); }
             else alert('Error resetting budget');
         }

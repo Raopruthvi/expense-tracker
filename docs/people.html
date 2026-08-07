@@ -48,14 +48,25 @@
       const API = 'https://expense-tracker-ajf3.onrender.com';
         const OWNER = 'mani';
 
+        function apiFetch(url, options = {}) {
+            options.credentials = 'include';
+            return fetch(url, options).then(res => {
+                if (res.status === 401) {
+                    window.location.href = `${API}/oauth2/authorization/google`;
+                    throw new Error('Not authenticated — redirecting to login');
+                }
+                return res;
+            });
+        }
+
         function fmt(v) {
             return parseFloat(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
         }
 
         async function loadPeople() {
             const [pr, er] = await Promise.all([
-                fetch(`${API}/api/people`),
-                fetch(`${API}/api/expenses`)
+                apiFetch(`${API}/api/people`),
+                apiFetch(`${API}/api/expenses`)
             ]);
             const people = await pr.json();
             const expenses = await er.json();

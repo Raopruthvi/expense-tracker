@@ -103,6 +103,17 @@
        const API = 'https://expense-tracker-ajf3.onrender.com';
         const OWNER = 'mani';
 
+        function apiFetch(url, options = {}) {
+            options.credentials = 'include';
+            return fetch(url, options).then(res => {
+                if (res.status === 401) {
+                    window.location.href = `${API}/oauth2/authorization/google`;
+                    throw new Error('Not authenticated — redirecting to login');
+                }
+                return res;
+            });
+        }
+
         function fmt(v) {
             return parseFloat(v).toLocaleString('en-IN', {
                 minimumFractionDigits: 2, maximumFractionDigits: 2
@@ -150,7 +161,7 @@
             if (owedByName) data.owedByName = owedByName;
 
             try {
-                const res = await fetch(`${API}/api/budget/expense`, {
+                const res = await apiFetch(`${API}/api/budget/expense`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -196,7 +207,7 @@
                 btn.className = 'filter-btn' + (f === filter ? ' active' : '');
             });
 
-            const res = await fetch(`${API}/api/expenses`);
+            const res = await apiFetch(`${API}/api/expenses`);
             let expenses = await res.json();
 
             const today = new Date();
@@ -281,7 +292,7 @@
         }
 
         async function settle(id) {
-            const res = await fetch(`${API}/api/budget/expense/${id}/settle`, {
+            const res = await apiFetch(`${API}/api/budget/expense/${id}/settle`, {
                 method: 'PUT'
             });
             if (!res.ok) {
@@ -294,7 +305,7 @@
 
         async function del(id) {
             if (!confirm('Delete this expense? All financial changes will be reversed.')) return;
-            await fetch(`${API}/api/budget/expense/${id}`, { method: 'DELETE' });
+            await apiFetch(`${API}/api/budget/expense/${id}`, { method: 'DELETE' });
             loadExpenses('all');
         }
 

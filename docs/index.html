@@ -128,14 +128,25 @@
     <script>
         const API = 'https://expense-tracker-ajf3.onrender.com';
 
+        function apiFetch(url, options = {}) {
+            options.credentials = 'include';
+            return fetch(url, options).then(res => {
+                if (res.status === 401) {
+                    window.location.href = `${API}/oauth2/authorization/google`;
+                    throw new Error('Not authenticated — redirecting to login');
+                }
+                return res;
+            });
+        }
+
         document.getElementById('currentDate').textContent =
             new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
 
         async function load() {
             try {
                 const [sr, br] = await Promise.all([
-                    fetch(`${API}/api/budget/summary`),
-                    fetch(`${API}/api/budget/monthly/current`)
+                    apiFetch(`${API}/api/budget/summary`),
+                    apiFetch(`${API}/api/budget/monthly/current`)
                 ]);
                 if (!sr.ok) return;
                 const d = await sr.json();
